@@ -20,39 +20,35 @@ export default function ProfileScreen({ navigation }) {
         source={{ uri: 'https://i.pinimg.com/564x/5a/00/c7/5a00c7344079a4dba42294ff41a08620.jpg' }}
         style={styles.profileImage}
       />
-      <View style={styles.header}>
-        <View style={{width: 24}} />
-        <TouchableOpacity style={styles.menuButton}>
-          <Ionicons name="ellipsis-horizontal" size={24} color={Colors.black} />
-        </TouchableOpacity>
-      </View>
       <View style={styles.contentContainer}>
         <View style={styles.titleContainer}>
           <View style={styles.tag}>
-            <Text style={styles.tagText}>RUSH</Text>
+            <Text style={styles.tagText}>UIUC</Text>
           </View>
           <StyledText black style={styles.title}>
-            (Syntara)
+            Arjun Kulkarni
           </StyledText>
         </View>
         <StyledText light style={styles.description}>
-          Premium sound quality for all styles, from deep bass drops to
-          delicate acoustic melodies.
+          I'm a student at UIUC and I love to code. I'm also a big fan of the Chicago Bulls.
         </StyledText>
         <View style={styles.footer}>
-          <View style={styles.socialIcons}>
-            <Image
-              source={{ uri: 'https://i.pravatar.cc/40?u=1' }}
-              style={styles.avatar}
-            />
-            <Image
-              source={{ uri: 'https://i.pravatar.cc/40?u=2' }}
-              style={[styles.avatar, styles.avatarOverlap]}
-            />
-            <Image
-              source={{ uri: 'https://i.pravatar.cc/40?u=3' }}
-              style={[styles.avatar, styles.avatarOverlap]}
-            />
+          <View>
+            <View style={styles.socialIcons}>
+              <Image
+                source={{ uri: 'https://i.pravatar.cc/40?u=1' }}
+                style={styles.avatar}
+              />
+              <Image
+                source={{ uri: 'https://i.pravatar.cc/40?u=2' }}
+                style={[styles.avatar, styles.avatarOverlap]}
+              />
+              <Image
+                source={{ uri: 'https://i.pravatar.cc/40?u=3' }}
+                style={[styles.avatar, styles.avatarOverlap]}
+              />
+            </View>
+            <StyledText light style={{textAlign: 'center', marginTop: 4, color: Colors.grey}}>Friends</StyledText>
           </View>
           <View style={styles.actionIcons}>
             <TouchableOpacity 
@@ -77,25 +73,13 @@ export default function ProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: Colors.white,
   },
   profileImage: {
     width: '100%',
     height: '60%',
     position: 'absolute',
     top: 0,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    marginTop: 24,
-  },
-  menuButton: {
-    padding: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    borderRadius: 15,
+    opacity: 0.6,
   },
   contentContainer: {
     flex: 1,
