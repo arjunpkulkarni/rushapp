@@ -1,13 +1,24 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { StyledText } from '../components/StyledText';
+import ChallengeCard from '../components/ChallengeCard';
 
 export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.screen}>
-      <StyledText bold style={styles.title}>Today's Challenge</StyledText>
-      {/* TODO: Display challenge info, submit button, live tracker */}
+      <StyledText semibold style={styles.header}>
+        Today's Challenge
+      </StyledText>
+      <View style={styles.cardContainer}>
+        <ChallengeCard
+          title="Campus Explorer"
+          description="Take a selfie with the Alma Mater statue."
+          isBonus={true}
+          timeLeft="02:13:09"
+          onSubmit={() => console.log('Submit Proof')}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -17,12 +28,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
     alignItems: 'center',
-    justifyContent: 'center',
     padding: 16,
   },
-  title: {
+  header: {
     fontSize: 28,
     color: Colors.black,
-    marginBottom: 16,
+    marginTop: 24,
+    marginBottom: 24,
+  },
+  cardContainer: {
+    width: '100%',
+    paddingHorizontal: 16,
   },
 });

@@ -1,12 +1,12 @@
 import React from 'react';
-import { Text, StyleSheet } from 'react-native';
+import { Text } from 'react-native';
 
 export function StyledText(props) {
-  const { style, light, medium, bold, italic, ...rest } = props;
+  const { style, light, medium, semibold, italic, ...rest } = props;
 
   const getFontFamily = () => {
-    if (bold && italic) return 'NeueMontreal-BoldItalic';
-    if (bold) return 'NeueMontreal-Bold';
+    if (semibold && italic) return 'NeueMontreal-BoldItalic';
+    if (semibold) return 'NeueMontreal-Bold';
     if (medium && italic) return 'NeueMontreal-MediumItalic';
     if (medium) return 'NeueMontreal-Medium';
     if (light && italic) return 'NeueMontreal-LightItalic';

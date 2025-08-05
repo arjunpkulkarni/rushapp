@@ -3,11 +3,13 @@ import { SafeAreaView, StyleSheet } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { StyledText } from '../components/StyledText';
 
-export default function WinningsScreen() {
+export default function HistoryScreen() {
   return (
     <SafeAreaView style={styles.screen}>
-      <StyledText bold style={styles.title}>Tier & Winnings</StyledText>
-      {/* TODO: Display buy-in levels & prize breakdown */}
+      <StyledText semibold style={styles.title}>
+        Challenge History
+      </StyledText>
+      {/* TODO: Feed of submissions */}
     </SafeAreaView>
   );
 }
@@ -17,12 +19,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
     alignItems: 'center',
-    justifyContent: 'center',
     padding: 16,
   },
   title: {
     fontSize: 28,
     color: Colors.black,
-    marginBottom: 16,
+    marginTop: 24,
+    marginBottom: 24,
   },
 });

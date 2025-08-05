@@ -4,10 +4,11 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import HomeScreen from '../screens/HomeScreen';
 import LeaderboardScreen from '../screens/LeaderboardScreen';
-import CampusFeedScreen from '../screens/CampusFeedScreen';
-import WinningsScreen from '../screens/WinningsScreen';
+import HistoryScreen from '../screens/HistoryScreen';
+import RewardsScreen from '../screens/RewardsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { Colors } from '../constants/Colors';
+import { StyledText } from '../components/StyledText';
 
 const Tab = createBottomTabNavigator();
 
@@ -18,9 +19,19 @@ export default function AppNavigator() {
         headerShown: false,
         tabBarActiveTintColor: Colors.black,
         tabBarInactiveTintColor: Colors.grey,
-        tabBarStyle: { 
+        tabBarStyle: {
           backgroundColor: Colors.white,
           borderTopColor: Colors.white,
+        },
+        tabBarLabel: ({ focused, color }) => {
+          return (
+            <StyledText
+              semibold
+              style={{ color, fontSize: 10, marginBottom: 5 }}
+            >
+              {route.name}
+            </StyledText>
+          );
         },
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
@@ -31,11 +42,11 @@ export default function AppNavigator() {
             case 'Leaderboard':
               iconName = focused ? 'trophy' : 'trophy-outline';
               break;
-            case 'Feed':
-              iconName = focused ? 'people' : 'people-outline';
+            case 'History':
+              iconName = focused ? 'time' : 'time-outline';
               break;
-            case 'Winnings':
-              iconName = focused ? 'cash' : 'cash-outline';
+            case 'Rewards':
+              iconName = focused ? 'gift' : 'gift-outline';
               break;
             case 'Profile':
               iconName = focused ? 'person' : 'person-outline';
@@ -47,8 +58,8 @@ export default function AppNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Leaderboard" component={LeaderboardScreen} />
-      <Tab.Screen name="Feed" component={CampusFeedScreen} />
-      <Tab.Screen name="Winnings" component={WinningsScreen} />
+      <Tab.Screen name="History" component={HistoryScreen} />
+      <Tab.Screen name="Rewards" component={RewardsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

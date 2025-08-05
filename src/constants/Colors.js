@@ -1,8 +1,9 @@
 export const Colors = {
-  black: '#000000',
+  deepPurple: '#3C2740',
+  lightYellow: '#EEC271',
+  orangeGold: '#F9A824',
+  electricBlue: '#004CF1',
   white: '#FFFFFF',
+  black: '#000000',
   grey: '#A9A9A9',
-  gold: '#EEC271',
-  orange: '#F9A824',
-  blue: '#004CF1',
 };
