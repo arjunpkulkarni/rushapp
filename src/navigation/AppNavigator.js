@@ -1,18 +1,20 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import HomeScreen from '../screens/HomeScreen';
 import LeaderboardScreen from '../screens/LeaderboardScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import RewardsScreen from '../screens/RewardsScreen';
-import ProfileScreen from '../screens/ProfileScreen';
 import { Colors } from '../constants/Colors';
 import { StyledText } from '../components/StyledText';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
-export default function AppNavigator() {
+function TabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -42,12 +44,6 @@ export default function AppNavigator() {
             case 'Leaderboard':
               iconName = focused ? 'trophy' : 'trophy-outline';
               break;
-            case 'History':
-              iconName = focused ? 'time' : 'time-outline';
-              break;
-            case 'Rewards':
-              iconName = focused ? 'gift' : 'gift-outline';
-              break;
             case 'Profile':
               iconName = focused ? 'person' : 'person-outline';
               break;
@@ -58,9 +54,17 @@ export default function AppNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Leaderboard" component={LeaderboardScreen} />
-      <Tab.Screen name="History" component={HistoryScreen} />
-      <Tab.Screen name="Rewards" component={RewardsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
+  );
+}
+
+export default function AppNavigator() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Main" component={TabNavigator} />
+      <Stack.Screen name="History" component={HistoryScreen} />
+      <Stack.Screen name="Rewards" component={RewardsScreen} />
+    </Stack.Navigator>
   );
 }

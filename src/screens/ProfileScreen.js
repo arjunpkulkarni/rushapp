@@ -1,15 +1,75 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
+import {
+  SafeAreaView,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Image,
+  Text,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Colors } from '../constants/Colors';
 import { StyledText } from '../components/StyledText';
+import HistoryScreen from '../screens/HistoryScreen';
+import RewardsScreen from '../screens/RewardsScreen';
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.screen}>
-      <StyledText semibold style={styles.title}>
-        My Profile
-      </StyledText>
-      {/* TODO: Profile info, settings */}
+      <Image
+        source={{ uri: 'https://i.pinimg.com/564x/5a/00/c7/5a00c7344079a4dba42294ff41a08620.jpg' }}
+        style={styles.profileImage}
+      />
+      <View style={styles.header}>
+        <View style={{width: 24}} />
+        <TouchableOpacity style={styles.menuButton}>
+          <Ionicons name="ellipsis-horizontal" size={24} color={Colors.black} />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.contentContainer}>
+        <View style={styles.titleContainer}>
+          <View style={styles.tag}>
+            <Text style={styles.tagText}>RUSH</Text>
+          </View>
+          <StyledText black style={styles.title}>
+            (Syntara)
+          </StyledText>
+        </View>
+        <StyledText light style={styles.description}>
+          Premium sound quality for all styles, from deep bass drops to
+          delicate acoustic melodies.
+        </StyledText>
+        <View style={styles.footer}>
+          <View style={styles.socialIcons}>
+            <Image
+              source={{ uri: 'https://i.pravatar.cc/40?u=1' }}
+              style={styles.avatar}
+            />
+            <Image
+              source={{ uri: 'https://i.pravatar.cc/40?u=2' }}
+              style={[styles.avatar, styles.avatarOverlap]}
+            />
+            <Image
+              source={{ uri: 'https://i.pravatar.cc/40?u=3' }}
+              style={[styles.avatar, styles.avatarOverlap]}
+            />
+          </View>
+          <View style={styles.actionIcons}>
+            <TouchableOpacity 
+              style={styles.iconButton}
+              onPress={() => navigation.navigate('History')}
+            >
+              <Ionicons name="time-outline" size={20} color={Colors.white} />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.iconButton}
+              onPress={() => navigation.navigate('Rewards')}
+            >
+              <Ionicons name="gift-outline" size={20} color={Colors.white} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -18,13 +78,80 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: Colors.white,
+  },
+  profileImage: {
+    width: '100%',
+    height: '60%',
+    position: 'absolute',
+    top: 0,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
+    marginTop: 24,
+  },
+  menuButton: {
+    padding: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 15,
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 24,
+    justifyContent: 'flex-end',
+  },
+  titleContainer: {
+    marginBottom: 16,
+  },
+  tag: {
+    backgroundColor: Colors.orangeGold,
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    alignSelf: 'flex-start',
+    marginBottom: 12,
+  },
+  tagText: {
+    color: Colors.white,
+    fontWeight: 'bold',
   },
   title: {
-    fontSize: 28,
-    color: Colors.black,
-    marginTop: 24,
+    fontSize: 48,
+    color: Colors.deepPurple,
+  },
+  description: {
+    fontSize: 18,
+    color: Colors.grey,
     marginBottom: 24,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  socialIcons: {
+    flexDirection: 'row',
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: Colors.white,
+  },
+  avatarOverlap: {
+    marginLeft: -15,
+  },
+  actionIcons: {
+    flexDirection: 'row',
+  },
+  iconButton: {
+    backgroundColor: Colors.deepPurple,
+    borderRadius: 15,
+    padding: 10,
+    marginLeft: 12,
   },
 });

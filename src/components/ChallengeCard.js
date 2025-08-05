@@ -1,41 +1,49 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { StyledText } from './StyledText';
 import { Colors } from '../constants/Colors';
 
-export default function ChallengeCard({
-  title,
-  description,
-  isBonus,
-  timeLeft,
-  onSubmit,
-}) {
+export default function ChallengeCard({ title, description, onSubmit }) {
   return (
-    <View style={styles.card}>
-      {isBonus && (
-        <LinearGradient
-          colors={['#EEC271', '#F9A824']}
-          style={styles.bonusRing}
-        />
-      )}
-      <StyledText semibold style={styles.title}>
-        {title}
-      </StyledText>
-      <StyledText regular style={styles.description}>
-        {description}
-      </StyledText>
-      <View style={styles.timerContainer}>
-        <StyledText medium style={styles.timerText}>
-          {timeLeft} left
+    <LinearGradient
+      colors={['#4A90E2', '#D8A44E']}
+      style={styles.card}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
+      <View style={styles.header}>
+        <StyledText medium style={styles.title}>
+          {title}
+        </StyledText>
+        <StyledText regular style={styles.description}>
+          {description}
         </StyledText>
       </View>
-      <TouchableOpacity style={styles.submitButton} onPress={onSubmit}>
-        <StyledText medium style={styles.submitButtonText}>
-          Submit Proof
-        </StyledText>
-      </TouchableOpacity>
-    </View>
+      <View style={styles.graphicContainer}>
+        <Image
+          source={{ uri: 'https://placekitten.com/200/200' }} // Replace with your image
+          style={styles.graphic}
+        />
+      </View>
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.customizeButton}>
+          <Ionicons
+            name="create-outline"
+            size={20}
+            color={Colors.white}
+            style={{ marginRight: 8 }}
+          />
+          <StyledText medium style={styles.buttonText}>
+            Submit Proof
+          </StyledText>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.playButton}>
+          <Ionicons name="checkmark-circle" size={24} color={Colors.black} />
+        </TouchableOpacity>
+      </View>
+    </LinearGradient>
   );
 }
 
@@ -43,61 +51,63 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     borderRadius: 32,
-    backgroundColor: Colors.white,
     padding: 24,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 10,
     elevation: 5,
-    borderWidth: 2,
-    borderColor: 'transparent',
   },
-  bonusRing: {
-    position: 'absolute',
-    top: -2,
-    left: -2,
-    right: -2,
-    bottom: -2,
-    borderRadius: 32,
-    zIndex: -1,
-  },
-  title: {
-    fontSize: 24,
-    color: Colors.black,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  description: {
-    fontSize: 16,
-    color: Colors.black,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  timerContainer: {
-    width: '100%',
-    height: 8,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 4,
+  header: {
+    alignSelf: 'flex-start',
     marginBottom: 24,
   },
-  timerText: {
-    position: 'absolute',
-    top: -20,
-    right: 0,
-    fontSize: 14,
-    color: Colors.black,
+  title: {
+    fontSize: 18,
+    color: Colors.white,
+    marginBottom: 4,
   },
-  submitButton: {
+  description: {
+    fontSize: 14,
+    color: Colors.white,
+  },
+  graphicContainer: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  graphic: {
     width: '100%',
-    backgroundColor: Colors.electricBlue,
-    borderRadius: 25,
-    paddingVertical: 16,
+    height: '100%',
+    borderRadius: 100,
+  },
+  footer: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  submitButtonText: {
+  customizeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 25,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  buttonText: {
     color: Colors.white,
-    fontSize: 16,
+    fontSize: 14,
+  },
+  playButton: {
+    backgroundColor: Colors.white,
+    borderRadius: 25,
+    padding: 12,
   },
 });
+
