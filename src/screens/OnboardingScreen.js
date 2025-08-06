@@ -9,7 +9,7 @@ const OnboardingScreen = ({ navigation }) => {
     name: '',
     username: '',
     phoneNumber: '',
-    campusId: 'clwyoqztc0000o5m9f8z1g1h1', // Hardcoded for UIUC
+    campusId: 'uiuc123', // Hardcoded for UIUC
   });
 
   const nextStep = () => setStep(step + 1);
