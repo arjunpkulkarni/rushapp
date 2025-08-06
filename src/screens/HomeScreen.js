@@ -15,11 +15,9 @@ export default function HomeScreen() {
   useEffect(() => {
     const fetchChallenges = async () => {
       try {
-        // TODO: Replace with dynamic campus ID
-        const campusId = 'clw8l427300001234567890ab';
-        const challengesData = await getChallenges(campusId);
+        const challengesData = await getChallenges();
         console.log('Challenges:', challengesData);
-        const featuredChallengeData = await getFeaturedChallenge(campusId);
+        const featuredChallengeData = await getFeaturedChallenge();
         console.log('Featured Challenge:', featuredChallengeData);
         setChallenges(challengesData);
         setFeaturedChallenge(featuredChallengeData);

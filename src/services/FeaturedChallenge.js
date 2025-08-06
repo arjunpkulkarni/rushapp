@@ -1,10 +1,8 @@
 import API from '../api/api';
 
-export const getFeaturedChallenge = async (campusId) => {
+export const getFeaturedChallenge = async () => {
   try {
-    const response = await API.get('/challenges/featured', {
-      params: { campus: campusId },
-    });
+    const response = await API.get('/challenges/featured');
     return response.data;
   } catch (error) {
     console.error('Error fetching featured challenge:', error);
