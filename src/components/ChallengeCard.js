@@ -39,9 +39,7 @@ export default function ChallengeCard({ title, description, onSubmit }) {
             Submit Proof
           </StyledText>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.playButton}>
-          <Ionicons name="checkmark-circle" size={24} color={Colors.black} />
-        </TouchableOpacity>
+        
       </View>
     </LinearGradient>
   );

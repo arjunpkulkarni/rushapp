@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -6,14 +6,39 @@ import {
   TouchableOpacity,
   Image,
   Text,
+  Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Colors } from '../constants/Colors';
 import { StyledText } from '../components/StyledText';
-import HistoryScreen from '../screens/HistoryScreen';
-import RewardsScreen from '../screens/RewardsScreen';
+import UserService from '../services/UserService';
 
 export default function ProfileScreen({ navigation }) {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        // Hardcoded user ID for now
+        const response = await UserService.getUser('clx9y22gq0000o8t1c3b1a2f3');
+        setUser(response.data);
+      } catch (error) {
+        Alert.alert('Error', 'Could not fetch user data.');
+        console.error(error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  if (!user) {
+    return (
+      <SafeAreaView style={styles.screen}>
+        <StyledText>Loading...</StyledText>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.screen}>
       <Image
@@ -23,14 +48,14 @@ export default function ProfileScreen({ navigation }) {
       <View style={styles.contentContainer}>
         <View style={styles.titleContainer}>
           <View style={styles.tag}>
-            <Text style={styles.tagText}>UIUC</Text>
+            <Text style={styles.tagText}>{user.campus.name}</Text>
           </View>
           <StyledText black style={styles.title}>
-            Arjun Kulkarni
+            {user.name}
           </StyledText>
         </View>
         <StyledText light style={styles.description}>
-          I'm a student at UIUC and I love to code. I'm also a big fan of the Chicago Bulls.
+          I'm a student at {user.campus.name} and I love to code. I'm also a big fan of the Chicago Bulls.
         </StyledText>
         <View style={styles.footer}>
           <View>

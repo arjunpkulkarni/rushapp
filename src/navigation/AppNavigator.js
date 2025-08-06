@@ -8,6 +8,7 @@ import LeaderboardScreen from '../screens/LeaderboardScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import RewardsScreen from '../screens/RewardsScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
 import { Colors } from '../constants/Colors';
 import { StyledText } from '../components/StyledText';
 
@@ -62,6 +63,7 @@ function TabNavigator() {
 export default function AppNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Main" component={TabNavigator} />
       <Stack.Screen name="History" component={HistoryScreen} />
       <Stack.Screen name="Rewards" component={RewardsScreen} />
