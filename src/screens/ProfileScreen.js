@@ -9,9 +9,11 @@ import {
   Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import * as SecureStore from 'expo-secure-store';
 import { Colors } from '../constants/Colors';
 import { StyledText } from '../components/StyledText';
 import UserService from '../services/UserService';
+import API from '../api/api';
 
 export default function ProfileScreen({ navigation }) {
   const [user, setUser] = useState(null);
@@ -19,17 +21,23 @@ export default function ProfileScreen({ navigation }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // Hardcoded user ID for now
-        const response = await UserService.getUser('clx9y22gq0000o8t1c3b1a2f3');
-        setUser(response.data);
+        const token = await SecureStore.getItemAsync('userToken');
+        if (token) {
+          API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          const response = await UserService.getMe();
+          setUser(response.data);
+        } else {
+          navigation.navigate('Onboarding');
+        }
       } catch (error) {
         Alert.alert('Error', 'Could not fetch user data.');
         console.error(error);
+        navigation.navigate('Onboarding');
       }
     };
 
     fetchUser();
-  }, []);
+  }, [navigation]);
 
   if (!user) {
     return (
@@ -42,39 +50,25 @@ export default function ProfileScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.screen}>
       <Image
-        source={{ uri: 'https://i.pinimg.com/564x/5a/00/c7/5a00c7344079a4dba42294ff41a08620.jpg' }}
+        source={{ uri: user.profileImage || 'https://i.pinimg.com/564x/5a/00/c7/5a00c7344079a4dba42294ff41a08620.jpg' }}
         style={styles.profileImage}
       />
       <View style={styles.contentContainer}>
         <View style={styles.titleContainer}>
-          <View style={styles.tag}>
-            <Text style={styles.tagText}>{user.campus.name}</Text>
-          </View>
+          {user.campus && (
+            <View style={styles.tag}>
+              <Text style={styles.tagText}>{user.campus.name}</Text>
+            </View>
+          )}
           <StyledText black style={styles.title}>
             {user.name}
           </StyledText>
         </View>
         <StyledText light style={styles.description}>
-          I'm a student at {user.campus.name} and I love to code. I'm also a big fan of the Chicago Bulls.
+          {user.bio || `I'm a student at ${user.campus?.name}`}
         </StyledText>
         <View style={styles.footer}>
-          <View>
-            <View style={styles.socialIcons}>
-              <Image
-                source={{ uri: 'https://i.pravatar.cc/40?u=1' }}
-                style={styles.avatar}
-              />
-              <Image
-                source={{ uri: 'https://i.pravatar.cc/40?u=2' }}
-                style={[styles.avatar, styles.avatarOverlap]}
-              />
-              <Image
-                source={{ uri: 'https://i.pravatar.cc/40?u=3' }}
-                style={[styles.avatar, styles.avatarOverlap]}
-              />
-            </View>
-            <StyledText light style={{textAlign: 'center', marginTop: 4, color: Colors.grey}}>Friends</StyledText>
-          </View>
+            <View/>
           <View style={styles.actionIcons}>
             <TouchableOpacity 
               style={styles.iconButton}
@@ -140,19 +134,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 32,
-  },
-  socialIcons: {
-    flexDirection: 'row',
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: Colors.white,
-  },
-  avatarOverlap: {
-    marginLeft: -15,
   },
   actionIcons: {
     flexDirection: 'row',
