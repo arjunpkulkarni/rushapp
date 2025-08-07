@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -7,62 +7,12 @@ import {
   Image,
   TouchableOpacity,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Colors } from '../constants/Colors';
 import { StyledText } from '../components/StyledText';
-
-const leaderboardData = [
-  {
-    id: '1',
-    name: 'lilyonetw...',
-    score: 146,
-    rank: 1,
-    avatar: 'https://i.pravatar.cc/150?u=1',
-  },
-  {
-    id: '2',
-    name: 'josheleve...',
-    score: 105,
-    rank: 2,
-    avatar: 'https://i.pravatar.cc/150?u=2',
-  },
-  {
-    id: '3',
-    name: 'herotaylo...',
-    score: 99,
-    rank: 3,
-    avatar: 'https://i.pravatar.cc/150?u=3',
-  },
-  {
-    id: '4',
-    name: 'whitefish664',
-    score: 96,
-    rank: 4,
-    avatar: 'https://i.pravatar.cc/150?u=4',
-  },
-  {
-    id: '5',
-    name: 'sadpanda176',
-    score: 88,
-    rank: 5,
-    avatar: 'https://i.pravatar.cc/150?u=5',
-  },
-  {
-    id: '6',
-    name: 'silverduck204',
-    score: 87,
-    rank: 6,
-    avatar: 'https://i.pravatar.cc/150?u=6',
-  },
-  {
-    id: '7',
-    name: 'beautifulmouse112',
-    score: 85,
-    rank: 7,
-    avatar: 'https://i.pravatar.cc/150?u=7',
-  },
-];
+import api from '../api/api';
 
 const PodiumItem = ({ user, rank }) => {
   const styles = podiumStyles(rank);
@@ -104,6 +54,57 @@ const ListItem = ({ user }) => (
 );
 
 export default function LeaderboardScreen({ navigation }) {
+  const [leaderboardData, setLeaderboardData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        // TODO: Replace with dynamic campus ID
+        const campusId = 'clysjrz2u000008l5d2l983s0';
+        const response = await api.get(`/leaderboard?campusId=${campusId}`);
+        setLeaderboardData(response.data);
+      } catch (err) {
+        setError('Failed to fetch leaderboard data.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, []);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.centered}>
+        <ActivityIndicator size="large" color={Colors.deepPurple} />
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.centered}>
+        <StyledText>{error}</StyledText>
+      </SafeAreaView>
+    );
+  }
+  
+  if (leaderboardData.length === 0) {
+    return (
+      <SafeAreaView style={styles.centered}>
+        <StyledText medium style={styles.emptyText}>
+          The leaderboard is empty.
+        </StyledText>
+        <StyledText regular style={styles.emptySubtext}>
+          Be the first to complete a challenge!
+        </StyledText>
+      </SafeAreaView>
+    );
+  }
+
   const topThree = leaderboardData.slice(0, 3).sort((a, b) => {
     if (a.rank === 1) return -1;
     if (b.rank === 1) return 1;
@@ -112,6 +113,7 @@ export default function LeaderboardScreen({ navigation }) {
     return 0;
   });
   const rest = leaderboardData.slice(3);
+
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -309,5 +311,20 @@ const styles = StyleSheet.create({
   },
   listScoreText: {
     color: Colors.deepPurple,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.lightGrey,
+  },
+  emptyText: {
+    fontSize: 20,
+    color: Colors.black,
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 16,
+    color: Colors.grey,
   },
 });
