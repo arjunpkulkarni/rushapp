@@ -8,8 +8,6 @@ import {
   Text,
   Alert,
   Linking,
-  View as RNView,
-  TouchableOpacity as RNTouchableOpacity,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as SecureStore from 'expo-secure-store';
@@ -67,9 +65,27 @@ export default function ProfileScreen({ navigation }) {
               <Text style={styles.tagText}>{user.campus.name}</Text>
             </View>
           )}
+          <TouchableOpacity onPress={async () => {
+            Alert.alert('Change photo', 'Enter a direct image URL to use as your profile background.', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Paste URL', onPress: async () => {
+                // simple prompt alternative: replace with a proper input UI as needed
+                const url = prompt('Image URL');
+                if (url) {
+                  try {
+                    await UserService.updateProfileImage(url);
+                    setUser({ ...user, profileImage: url });
+                  } catch (e) {
+                    Alert.alert('Error', 'Could not update image');
+                  }
+                }
+              }}
+            ]);
+          }}>
           <StyledText black style={styles.title}>
             {user.name}
           </StyledText>
+          </TouchableOpacity>
         </View>
         <StyledText light style={styles.description}>
           {user.bio || `I'm a student at ${user.campus?.name}`}
