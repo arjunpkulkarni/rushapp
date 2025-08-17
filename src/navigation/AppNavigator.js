@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { ActivityIndicator, View } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 
 import HomeScreen from '../screens/HomeScreen';
 import LeaderboardScreen from '../screens/LeaderboardScreen';
@@ -61,8 +63,29 @@ function TabNavigator() {
 }
 
 export default function AppNavigator() {
+  const [initialRoute, setInitialRoute] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = await SecureStore.getItemAsync('userToken');
+        setInitialRoute(token ? 'Main' : 'Onboarding');
+      } catch {
+        setInitialRoute('Onboarding');
+      }
+    })();
+  }, []);
+
+  if (!initialRoute) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Main" component={TabNavigator} />
       <Stack.Screen name="History" component={HistoryScreen} />

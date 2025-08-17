@@ -176,7 +176,8 @@ const OnboardingScreen = ({ navigation }) => {
             <GhostButton title="Back" onPress={prevStep} />
             <PrimaryButton title="Verify" onPress={async () => {
               try {
-                await API.post('/auth/otp/verify', { phoneNumber: formData.phoneNumber, code: otpCode });
+                const res = await API.post('/auth/otp/verify', { phoneNumber: formData.phoneNumber, code: otpCode });
+                await SecureStore.setItemAsync('userToken', res.data.token);
                 setOtpSent(false);
                 nextStep();
               } catch (e) {
@@ -235,7 +236,19 @@ const OnboardingScreen = ({ navigation }) => {
               <Picker.Item label="University of Illinois Urbana-Champaign" value="clwyoqztc0000o5m9f8z1g1h1" />
             </Picker>
             <GhostButton title="Back" onPress={prevStep} />
-            <PrimaryButton title="Sign up" onPress={handleRegister} />
+            <PrimaryButton title="Sign up" onPress={async () => {
+              try {
+                await UserService.completeUser({
+                  name: formData.name,
+                  username: formData.username,
+                  phoneNumber: formData.phoneNumber,
+                  campusId: formData.campusId,
+                });
+                navigation.navigate('Main');
+              } catch (e) {
+                Alert.alert('Error', 'Could not finish signup');
+              }
+            }} />
           </View>
         );
       default:

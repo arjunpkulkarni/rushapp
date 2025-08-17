@@ -7,6 +7,9 @@ import {
   Image,
   Text,
   Alert,
+  Linking,
+  View as RNView,
+  TouchableOpacity as RNTouchableOpacity,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as SecureStore from 'expo-secure-store';
@@ -17,6 +20,7 @@ import API from '../api/api';
 
 export default function ProfileScreen({ navigation }) {
   const [user, setUser] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -49,6 +53,9 @@ export default function ProfileScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.screen}>
+      <TouchableOpacity style={styles.settingsFab} onPress={() => setShowSettings(true)}>
+        <Ionicons name="settings-outline" size={20} color={Colors.white} />
+      </TouchableOpacity>
       <Image
         source={{ uri: user.profileImage || 'https://i.pinimg.com/564x/5a/00/c7/5a00c7344079a4dba42294ff41a08620.jpg' }}
         style={styles.profileImage}
@@ -85,6 +92,46 @@ export default function ProfileScreen({ navigation }) {
           </View>
         </View>
       </View>
+      {showSettings && (
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <StyledText semibold style={{ fontSize: 18, marginBottom: 8 }}>Settings</StyledText>
+            <TouchableOpacity style={styles.row} onPress={async () => {
+              await SecureStore.deleteItemAsync('userToken');
+              setShowSettings(false);
+              navigation.reset({ index: 0, routes: [{ name: 'Onboarding' }] });
+            }}>
+              <StyledText semibold>Log out</StyledText>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.row, styles.rowDanger]} onPress={() => {
+              Alert.alert('Delete account', 'This cannot be undone. Continue?', [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Delete', style: 'destructive', onPress: async () => {
+                  try {
+                    await API.delete('/users/me');
+                    await SecureStore.deleteItemAsync('userToken');
+                    navigation.reset({ index: 0, routes: [{ name: 'Onboarding' }] });
+                  } catch (e) {
+                    Alert.alert('Error', 'Could not delete account');
+                  }
+                } }
+              ]);
+            }}>
+              <StyledText semibold style={{ color: '#d02c2c' }}>Delete account</StyledText>
+            </TouchableOpacity>
+            <StyledText medium style={styles.cardTitle}>Legal</StyledText>
+            <TouchableOpacity style={styles.row} onPress={() => Linking.openURL('https://example.com/terms').catch(() => {})}>
+              <StyledText>Terms and Conditions</StyledText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.row} onPress={() => Linking.openURL('https://example.com/privacy').catch(() => {})}>
+              <StyledText>Privacy Policy</StyledText>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.row, { alignItems: 'center' }]} onPress={() => setShowSettings(false)}>
+              <StyledText>Close</StyledText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -128,6 +175,44 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.grey,
     marginBottom: 24,
+  },
+  settingsFab: {
+    position: 'absolute',
+    top: 66,
+    right: 16,
+    zIndex: 10,
+    backgroundColor: Colors.deepPurple,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: 0.9,
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  modalCard: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 16,
+  },
+  cardTitle: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  row: {
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  rowDanger: {
+    borderTopColor: '#f2d6d6',
   },
   footer: {
     flexDirection: 'row',

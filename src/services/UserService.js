@@ -4,6 +4,9 @@ const UserService = {
   createUser: (userData) => {
     return API.post('/users', userData);
   },
+  completeUser: (userData) => {
+    return API.post('/users/complete', userData);
+  },
   getUser: (userId) => {
     return API.get(`/users/${userId}`);
   },
