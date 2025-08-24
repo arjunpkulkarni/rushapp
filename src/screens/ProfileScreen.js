@@ -4,42 +4,39 @@ import {
   StyleSheet,
   View,
   TouchableOpacity,
-  Image,
   Text,
   Alert,
   Linking,
 } from 'react-native';
+// no image picker; avatar will render initials only
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as SecureStore from 'expo-secure-store';
 import { Colors } from '../constants/Colors';
 import { StyledText } from '../components/StyledText';
 import UserService from '../services/UserService';
 import API from '../api/api';
+import { useAtom } from 'jotai';
+import { userAtom } from '../state/atoms';
 
 export default function ProfileScreen({ navigation }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useAtom(userAtom);
   const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const token = await SecureStore.getItemAsync('userToken');
-        if (token) {
-          API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          const response = await UserService.getMe();
-          setUser(response.data);
-        } else {
-          navigation.navigate('Onboarding');
-        }
+        if (!token) return navigation.navigate('Onboarding');
+        API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        const response = await UserService.getMe();
+        setUser(response.data);
       } catch (error) {
-        Alert.alert('Error', 'Could not fetch user data.');
         console.error(error);
         navigation.navigate('Onboarding');
       }
     };
-
-    fetchUser();
-  }, [navigation]);
+    if (!user) fetchUser();
+  }, [navigation, user, setUser]);
 
   if (!user) {
     return (
@@ -49,15 +46,24 @@ export default function ProfileScreen({ navigation }) {
     );
   }
 
+  const getInitials = (fullName) => {
+    if (!fullName) return 'U';
+    const parts = fullName.trim().split(/\s+/);
+    const first = parts[0]?.[0] || '';
+    const last = parts.length > 1 ? (parts[parts.length - 1][0] || '') : '';
+    return (first + last).toUpperCase();
+  };
+
   return (
     <SafeAreaView style={styles.screen}>
       <TouchableOpacity style={styles.settingsFab} onPress={() => setShowSettings(true)}>
         <Ionicons name="settings-outline" size={20} color={Colors.white} />
       </TouchableOpacity>
-      <Image
-        source={{ uri: user.profileImage || 'https://i.pinimg.com/564x/5a/00/c7/5a00c7344079a4dba42294ff41a08620.jpg' }}
-        style={styles.profileImage}
-      />
+      <View style={styles.avatarWrapper}>
+        <View style={styles.avatarCircle}>
+          <StyledText semibold style={styles.avatarInitials}>{getInitials(user.name)}</StyledText>
+        </View>
+      </View>
       <View style={styles.contentContainer}>
         <View style={styles.titleContainer}>
           {user.campus && (
@@ -65,27 +71,9 @@ export default function ProfileScreen({ navigation }) {
               <Text style={styles.tagText}>{user.campus.name}</Text>
             </View>
           )}
-          <TouchableOpacity onPress={async () => {
-            Alert.alert('Change photo', 'Enter a direct image URL to use as your profile background.', [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Paste URL', onPress: async () => {
-                // simple prompt alternative: replace with a proper input UI as needed
-                const url = prompt('Image URL');
-                if (url) {
-                  try {
-                    await UserService.updateProfileImage(url);
-                    setUser({ ...user, profileImage: url });
-                  } catch (e) {
-                    Alert.alert('Error', 'Could not update image');
-                  }
-                }
-              }}
-            ]);
-          }}>
           <StyledText black style={styles.title}>
             {user.name}
           </StyledText>
-          </TouchableOpacity>
         </View>        
         <View style={styles.footer}>
             <View/>
@@ -153,12 +141,27 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  profileImage: {
+  avatarWrapper: {
     width: '100%',
-    height: '60%',
+    height: '50%',
     position: 'absolute',
     top: 0,
-    opacity: 0.6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarCircle: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: Colors.lightPurple,
+    borderWidth: 2,
+    borderColor: Colors.electricBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarInitials: {
+    color: Colors.electricBlue,
+    fontSize: 48,
   },
   contentContainer: {
     flex: 1,
@@ -183,6 +186,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 48,
     color: Colors.electricBlue,
+  },
+  changePhotoBtn: {
+    backgroundColor: Colors.electricBlue,
+    alignSelf: 'flex-start',
+    marginTop: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
   },
   description: {
     fontSize: 18,

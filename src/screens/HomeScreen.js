@@ -189,10 +189,12 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     backgroundColor: 'white',
-    padding: 20,
+    padding: 22,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
+    paddingBottom: 28,
+    marginBottom: 12,
   },
   modalTitle: {
     fontSize: 22,
@@ -228,7 +230,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelLink: {
-    marginTop: 12,
+    marginTop: 16,
     alignItems: 'center',
   },
 });

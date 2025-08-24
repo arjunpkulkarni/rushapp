@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TextInput, StyleSheet, SafeAreaView, Alert, TouchableOpacity, KeyboardAvoidingView, Platform, ImageBackground, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as SecureStore from 'expo-secure-store';
@@ -6,19 +6,16 @@ import UserService from '../services/UserService';
 import API from '../api/api';
 import { StyledText } from '../components/StyledText';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useAtom } from 'jotai';
+import { isLoginAtom, onboardingStepAtom, loginStepAtom, formDataAtom, otpCodeAtom, otpSentAtom } from '../state/atoms';
 
 const OnboardingScreen = ({ navigation }) => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [step, setStep] = useState(1);
-  const [loginStep, setLoginStep] = useState(1);
-  const [formData, setFormData] = useState({
-    name: '',
-    username: '',
-    phoneNumber: '',
-    campusId: 'uiuc123', 
-  });
-  const [otpCode, setOtpCode] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
+  const [isLogin, setIsLogin] = useAtom(isLoginAtom);
+  const [step, setStep] = useAtom(onboardingStepAtom);
+  const [loginStep, setLoginStep] = useAtom(loginStepAtom);
+  const [formData, setFormData] = useAtom(formDataAtom);
+  const [otpCode, setOtpCode] = useAtom(otpCodeAtom);
+  const [otpSent, setOtpSent] = useAtom(otpSentAtom);
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);

@@ -4,7 +4,6 @@ import {
   StyleSheet,
   View,
   Text,
-  Image,
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
@@ -14,12 +13,37 @@ import { Colors } from '../constants/Colors';
 import { StyledText } from '../components/StyledText';
 import api from '../api/api';
 
+const getInitials = (name) => {
+  if (!name) return 'U';
+  const parts = String(name).trim().split(/\s+/);
+  const first = parts[0]?.[0] || '';
+  const last = parts.length > 1 ? (parts[parts.length - 1][0] || '') : '';
+  return (first + last).toUpperCase();
+};
+
+const InitialsAvatar = ({ size, name }) => (
+  <View style={{
+    width: size,
+    height: size,
+    borderRadius: size / 2,
+    backgroundColor: Colors.lightPurple,
+    borderWidth: 2,
+    borderColor: Colors.electricBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}>
+    <StyledText semibold style={{ color: Colors.electricBlue, fontSize: size * 0.35 }}>
+      {getInitials(name)}
+    </StyledText>
+  </View>
+);
+
 const PodiumItem = ({ user, rank }) => {
   const styles = podiumStyles(rank);
   return (
     <View style={styles.podiumItem}>
       <View style={styles.avatarContainer}>
-        <Image source={{ uri: user.avatar }} style={styles.avatar} />
+        <InitialsAvatar size={styles._avatarSize} name={user.name} />
         <View style={styles.rankBadge}>
           <Text style={styles.rankText}>{user.rank}</Text>
         </View>
@@ -41,7 +65,7 @@ const ListItem = ({ user }) => (
     <StyledText medium style={styles.listRank}>
       {user.rank}
     </StyledText>
-    <Image source={{ uri: user.avatar }} style={styles.listAvatar} />
+    <InitialsAvatar size={40} name={user.name} />
     <StyledText regular style={styles.listName}>
       {user.name}
     </StyledText>
@@ -187,23 +211,12 @@ const podiumStyles = (rank) => {
       width: size,
       height: size,
       borderRadius: size / 2,
-      borderWidth: 3,
-      borderColor: Colors.white,
+      borderWidth: 0,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: 10,
-      backgroundColor: '#F0F0F0',
-      elevation: 5,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
     },
-    avatar: {
-      width: '100%',
-      height: '100%',
-      borderRadius: size / 2,
-    },
+    _avatarSize: size,
     rankBadge: {
       position: 'absolute',
       top: rankBadgePosition,
