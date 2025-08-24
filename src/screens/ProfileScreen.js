@@ -86,10 +86,7 @@ export default function ProfileScreen({ navigation }) {
             {user.name}
           </StyledText>
           </TouchableOpacity>
-        </View>
-        <StyledText light style={styles.description}>
-          {user.bio || `I'm a student at ${user.campus?.name}`}
-        </StyledText>
+        </View>        
         <View style={styles.footer}>
             <View/>
           <View style={styles.actionIcons}>
@@ -185,7 +182,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 48,
-    color: Colors.deepPurple,
+    color: Colors.electricBlue,
   },
   description: {
     fontSize: 18,
@@ -240,7 +237,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   iconButton: {
-    backgroundColor: Colors.deepPurple,
+    backgroundColor: Colors.electricBlue,
     borderRadius: 15,
     padding: 10,
     marginLeft: 12,

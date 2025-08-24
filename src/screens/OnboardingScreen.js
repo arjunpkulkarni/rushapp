@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, SafeAreaView, Alert, TouchableOpacity, KeyboardAvoidingView, Platform, ImageBackground } from 'react-native';
+import { View, Text, TextInput, StyleSheet, SafeAreaView, Alert, TouchableOpacity, KeyboardAvoidingView, Platform, ImageBackground, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as SecureStore from 'expo-secure-store';
 import UserService from '../services/UserService';
@@ -258,20 +258,30 @@ const OnboardingScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, width: '100%' }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+        style={{ flex: 1, width: '100%' }}
+      >
         <View style={styles.header}>
           <StyledText semibold style={styles.brand}>Rush</StyledText>
         </View>
-        <View style={styles.formContainer}>
-          {isLogin ? renderLoginForm() : renderRegisterForm()}
-        </View>
-        <View style={styles.footerDots}>
-          {isLogin ? (
-            <ProgressDots total={2} active={loginStep} />
-          ) : (
-            <ProgressDots total={5} active={step} />
-          )}
-        </View>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 32 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.formContainer}>
+            {isLogin ? renderLoginForm() : renderRegisterForm()}
+            <View style={styles.inlineDots}>
+              {isLogin ? (
+                <ProgressDots total={2} active={loginStep} />
+              ) : (
+                <ProgressDots total={5} active={step} />
+              )}
+            </View>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -287,6 +297,10 @@ const styles = StyleSheet.create({
     width: '88%',
     alignSelf: 'center',
     paddingBottom: 16,
+  },
+  inlineDots: {
+    alignItems: 'center',
+    marginTop: 16,
   },
   footerDots: {
     width: '100%',

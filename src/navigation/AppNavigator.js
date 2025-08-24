@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, Image } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 import HomeScreen from '../screens/HomeScreen';
 import LeaderboardScreen from '../screens/LeaderboardScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import FeedScreen from '../screens/FeedScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import RewardsScreen from '../screens/RewardsScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
@@ -27,35 +28,37 @@ function TabNavigator() {
         tabBarStyle: {
           backgroundColor: Colors.white,
           borderTopColor: Colors.white,
+          height: 70,
+          paddingBottom: 4,
+          paddingTop: 6,
         },
-        tabBarLabel: ({ focused, color }) => {
-          return (
-            <StyledText
-              semibold
-              style={{ color, fontSize: 10, marginBottom: 5 }}
-            >
-              {route.name}
-            </StyledText>
-          );
-        },
+        tabBarItemStyle: { paddingVertical: 0 },
+        tabBarShowLabel: false,
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
+          let source;
           switch (route.name) {
             case 'Home':
-              iconName = focused ? 'home' : 'home-outline';
+              source = require('../pictures/icons/bet.png');
+              break;
+            case 'Feed':
+              source = require('../pictures/icons/feed.png');
               break;
             case 'Leaderboard':
-              iconName = focused ? 'trophy' : 'trophy-outline';
+              source = require('../pictures/icons/leaderboard.png');
               break;
             case 'Profile':
-              iconName = focused ? 'person' : 'person-outline';
+              source = require('../pictures/icons/profile.png');
               break;
           }
-          return <Ionicons name={iconName} size={size} color={color} />;
+          const tintColor = focused ? Colors.electricBlue : Colors.grey;
+          return (
+            <Image source={source} style={{ width: 24, height: 24, tintColor }} />
+          );
         },
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Feed" component={FeedScreen} />
       <Tab.Screen name="Leaderboard" component={LeaderboardScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

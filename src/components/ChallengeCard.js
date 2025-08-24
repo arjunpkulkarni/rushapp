@@ -8,7 +8,7 @@ import { Colors } from '../constants/Colors';
 export default function ChallengeCard({ title, description, onSubmit }) {
   return (
     <LinearGradient
-      colors={['#4A90E2', '#D8A44E']}
+      colors={[Colors.electricBlue, Colors.lightPurple]}
       style={styles.card}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -28,7 +28,7 @@ export default function ChallengeCard({ title, description, onSubmit }) {
         />
       </View>
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.customizeButton}>
+        <TouchableOpacity style={styles.customizeButton} onPress={onSubmit}>
           <Ionicons
             name="create-outline"
             size={20}
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   customizeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
     borderRadius: 25,
     paddingVertical: 10,
     paddingHorizontal: 16,
