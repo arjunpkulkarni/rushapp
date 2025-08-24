@@ -95,7 +95,7 @@ export default function HomeScreen() {
                 onPress={async () => {
                   try {
                     await ImagePicker.requestCameraPermissionsAsync();
-                    const media = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Videos, allowsEditing: false, videoMaxDuration: 60 });
+                    const media = await ImagePicker.launchCameraAsync({ mediaTypes: 'videos', allowsEditing: false, videoMaxDuration: 60 });
                     if (!media.canceled) {
                       setVideoUri(media.assets[0].uri);
                       setPickedAt(new Date());
@@ -110,7 +110,7 @@ export default function HomeScreen() {
                 onPress={async () => {
                   try {
                     await ImagePicker.requestMediaLibraryPermissionsAsync();
-                    const media = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Videos });
+                    const media = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'videos' });
                     if (!media.canceled) {
                       setVideoUri(media.assets[0].uri);
                       setPickedAt(new Date());
