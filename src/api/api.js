@@ -2,10 +2,7 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 const API = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: 'https://exemplary-charm-production.up.railway.app/api/v1',
 });
 
 API.interceptors.request.use(async (config) => {

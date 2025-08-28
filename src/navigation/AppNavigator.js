@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ActivityIndicator, View, Image } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 import HomeScreen from '../screens/HomeScreen';
 import LeaderboardScreen from '../screens/LeaderboardScreen';
-import ProfileScreen from '../screens/ProfileScreen';
 import FeedScreen from '../screens/FeedScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import RewardsScreen from '../screens/RewardsScreen';
@@ -34,7 +32,7 @@ function TabNavigator() {
         },
         tabBarItemStyle: { paddingVertical: 0 },
         tabBarShowLabel: false,
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ focused }) => {
           let source;
           switch (route.name) {
             case 'Home':
@@ -45,9 +43,6 @@ function TabNavigator() {
               break;
             case 'Leaderboard':
               source = require('../pictures/icons/leaderboard.png');
-              break;
-            case 'Profile':
-              source = require('../pictures/icons/profile.png');
               break;
           }
           const tintColor = focused ? Colors.electricBlue : Colors.grey;
@@ -60,7 +55,6 @@ function TabNavigator() {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Feed" component={FeedScreen} />
       <Tab.Screen name="Leaderboard" component={LeaderboardScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }

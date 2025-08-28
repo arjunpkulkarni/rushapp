@@ -7,11 +7,14 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  Modal,
+  ScrollView,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Colors } from '../constants/Colors';
 import { StyledText } from '../components/StyledText';
 import api from '../api/api';
+import { getChallenges } from '../services/ChallengeService';
 
 const getInitials = (name) => {
   if (!name) return 'U';
@@ -81,6 +84,9 @@ export default function LeaderboardScreen({ navigation }) {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pastChallenges, setPastChallenges] = useState([]);
+  const [showPastModal, setShowPastModal] = useState(false);
+  const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -99,6 +105,34 @@ export default function LeaderboardScreen({ navigation }) {
 
     fetchLeaderboard();
   }, []);
+
+  // Fetch challenges to build Past Challenges list
+  useEffect(() => {
+    (async () => {
+      try {
+        const challenges = await getChallenges();
+        const past = challenges.filter((c) => new Date(c.expiresAt).getTime() <= Date.now());
+        setPastChallenges(past);
+      } catch (e) {
+        console.log('Failed to fetch challenges for past modal', e?.message);
+      }
+    })();
+  }, []);
+
+  // Timer tick (useful if we later show countdowns here)
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const formatDateTime = (iso) => {
+    try {
+      const d = new Date(iso);
+      return d.toLocaleString();
+    } catch {
+      return String(iso);
+    }
+  };
 
   if (loading) {
     return (
@@ -148,6 +182,13 @@ export default function LeaderboardScreen({ navigation }) {
         <StyledText regular style={styles.headerSubtitle}>
           Top Ranks in Champaign
         </StyledText>
+        <TouchableOpacity
+          style={styles.pastBtn}
+          onPress={() => setShowPastModal(true)}
+          hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+        >
+          <Ionicons name="time-outline" size={20} color={Colors.black} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.podiumContainer}>
@@ -163,6 +204,43 @@ export default function LeaderboardScreen({ navigation }) {
         style={styles.list}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
+
+      {/* Past Challenges Modal */}
+      <Modal
+        transparent
+        visible={showPastModal}
+        animationType="slide"
+        onRequestClose={() => setShowPastModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.sheetHandle} />
+            <View style={styles.modalHeader}>
+              <StyledText semibold style={styles.modalTitle}>Past Challenges</StyledText>
+              <TouchableOpacity onPress={() => setShowPastModal(false)} style={styles.closeButton}>
+                <Ionicons name="close" size={20} color={Colors.black} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView contentContainerStyle={{ paddingBottom: 12 }}>
+              {pastChallenges.length === 0 && (
+                <StyledText style={{ color: Colors.grey }}>No past challenges yet.</StyledText>
+              )}
+              {pastChallenges.map((c) => (
+                <View key={c.id} style={styles.pastItem}>
+                  <View style={{ flex: 1 }}>
+                    <StyledText semibold style={{ marginBottom: 2 }}>{c.title}</StyledText>
+                    <StyledText style={{ color: Colors.grey, fontSize: 12 }}>{c.description}</StyledText>
+                  </View>
+                  <View style={styles.pastMeta}>
+                    <Ionicons name="calendar-outline" size={16} color={Colors.grey} />
+                    <StyledText style={styles.pastMetaText}>{formatDateTime(c.expiresAt)}</StyledText>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -265,6 +343,14 @@ const styles = StyleSheet.create({
     marginTop: 24,
     marginBottom: 12,
   },
+  pastBtn: {
+    position: 'absolute',
+    right: 16,
+    top: 26,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 16,
+    padding: 6,
+  },
   headerTitle: {
     fontSize: 32,
     color: Colors.black,
@@ -324,6 +410,58 @@ const styles = StyleSheet.create({
   },
   listScoreText: {
     color: Colors.deepPurple,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalCard: {
+    backgroundColor: Colors.white,
+    padding: 16,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '85%',
+  },
+  sheetHandle: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    backgroundColor: '#e5e7eb',
+    borderRadius: 999,
+    marginBottom: 12,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  modalTitle: {
+    fontSize: 18,
+  },
+  closeButton: {
+    padding: 6,
+    borderRadius: 999,
+    backgroundColor: '#f3f4f6',
+  },
+  pastItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  pastMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginLeft: 12,
+  },
+  pastMetaText: {
+    color: Colors.grey,
+    fontSize: 12,
   },
   centered: {
     flex: 1,

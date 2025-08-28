@@ -5,7 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { StyledText } from './StyledText';
 import { Colors } from '../constants/Colors';
 
-export default function ChallengeCard({ title, description, onSubmit }) {
+export default function ChallengeCard({ title, description, onSubmit, timeRemaining, timeLabel = 'Time', disabled }) {
   return (
     <LinearGradient
       colors={[Colors.electricBlue, Colors.lightPurple]}
@@ -28,7 +28,11 @@ export default function ChallengeCard({ title, description, onSubmit }) {
         />
       </View>
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.customizeButton} onPress={onSubmit}>
+        <View style={styles.timePill}>
+          <Ionicons name="time-outline" size={16} color={Colors.white} style={{ marginRight: 6 }} />
+          <StyledText style={styles.timeText}>{timeLabel}: {timeRemaining}</StyledText>
+        </View>
+        <TouchableOpacity disabled={disabled} style={[styles.customizeButton, disabled && { opacity: 0.5 }]} onPress={onSubmit}>
           <Ionicons
             name="create-outline"
             size={20}
@@ -89,6 +93,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  timePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 25,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  timeText: {
+    color: Colors.white,
+    fontSize: 12,
   },
   customizeButton: {
     flexDirection: 'row',

@@ -19,8 +19,6 @@ export const submitProof = async ({ challengeId, campusId, videoUri }) => {
     name: 'proof.mp4',
     type: 'video/mp4',
   });
-  const res = await API.post('/submissions', form, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const res = await API.post('/submissions', form);
   return res.data;
 };

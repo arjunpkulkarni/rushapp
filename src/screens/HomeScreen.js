@@ -17,6 +17,9 @@ export default function HomeScreen() {
   const [activeChallenge, setActiveChallenge] = useState(null);
   const [videoUri, setVideoUri] = useState('');
   const [pickedAt, setPickedAt] = useState(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [now, setNow] = useState(Date.now());
+  const [pastChallenges, setPastChallenges] = useState([]);
 
   useEffect(() => {
     const fetchChallenges = async () => {
@@ -35,6 +38,44 @@ export default function HomeScreen() {
     fetchChallenges();
   }, []);
 
+  // Tick every second for countdown timers
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Partition into upcoming, active, and past based on scheduledAt/expiresAt
+  const partitioned = React.useMemo(() => {
+    const upcoming = [];
+    const active = [];
+    const past = [];
+    for (const c of challenges) {
+      const start = new Date(c.scheduledAt).getTime();
+      const end = new Date(c.expiresAt).getTime();
+      if (now < start) upcoming.push(c);
+      else if (now >= start && now < end) active.push(c);
+      else past.push(c);
+    }
+    return { upcoming, active, past };
+  }, [challenges, now]);
+
+  useEffect(() => {
+    setPastChallenges(partitioned.past);
+  }, [partitioned.past]);
+
+  const formatRemaining = (targetIso) => {
+    const ms = new Date(targetIso).getTime() - now;
+    if (ms <= 0) return 'Expired';
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    const hh = hours.toString().padStart(2, '0');
+    const mm = minutes.toString().padStart(2, '0');
+    const ss = seconds.toString().padStart(2, '0');
+    return `${hh}:${mm}:${ss}`;
+  };
+
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -47,8 +88,8 @@ export default function HomeScreen() {
               Challenge
             </StyledText>
           </View>
-          <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="filter" size={24} color={Colors.white} />
+          <TouchableOpacity style={styles.headerButton} onPress={() => setIsSettingsOpen(true)}>
+            <Ionicons name="settings-sharp" size={24} color={Colors.white} />
           </TouchableOpacity>
         </View>
         <View style={styles.cardContainer}>
@@ -56,28 +97,76 @@ export default function HomeScreen() {
             <FeaturedChallengeCard
               title={featuredChallenge.title}
               description={featuredChallenge.description}
-              progress={0} // TODO: Calculate progress
-              timeRemaining="TODO" // TODO: Calculate time remaining
-              image="https://www.insidehighered.com/sites/default/files/media/iStock-1436447934.jpg" // TODO: Use challenge image
+              progress={0}
+              timeRemaining={formatRemaining(featuredChallenge.expiresAt || new Date())}
+              image="https://www.insidehighered.com/sites/default/files/media/iStock-1436447934.jpg"
             />
           )}
-          {challenges
-            .filter((challenge) => !challenge.isBonus)
-            .map((challenge) => (
+          {[
+            ...partitioned.active.filter((c) => !c.isBonus),
+            ...partitioned.upcoming.filter((c) => !c.isBonus),
+          ].map((challenge) => {
+            const isActive = new Date(challenge.scheduledAt).getTime() <= now && new Date(challenge.expiresAt).getTime() > now;
+            const timeLabel = isActive ? 'Ends in' : 'Starts in';
+            const timeTarget = isActive ? challenge.expiresAt : challenge.scheduledAt;
+            return (
               <ChallengeCard
                 key={challenge.id}
                 title={challenge.title}
                 description={challenge.description}
+                timeRemaining={formatRemaining(timeTarget)}
+                timeLabel={timeLabel}
+                disabled={!isActive}
                 onSubmit={() => {
+                  if (!isActive) return;
                   setActiveChallenge(challenge);
                   setVideoUri('');
                   setPickedAt(null);
                   setIsSubmitOpen(true);
                 }}
               />
-            ))}
+            );
+          })}
         </View>
       </ScrollView>
+
+      {/* Settings Modal */}
+      <Modal visible={isSettingsOpen} transparent animationType="slide" onRequestClose={() => setIsSettingsOpen(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.sheetHandle} />
+            <View style={styles.settingsHeader}>
+              <StyledText semibold style={styles.modalTitle}>Settings</StyledText>
+              <TouchableOpacity onPress={() => setIsSettingsOpen(false)} style={styles.closeButton}>
+                <Ionicons name="close" size={20} color={Colors.black} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.settingsList}>
+              <TouchableOpacity style={styles.settingsItem}>
+                <View style={styles.settingsLeft}>
+                  <Ionicons name="notifications-outline" size={20} color={Colors.black} />
+                  <StyledText style={styles.settingsLabel}>Notifications</StyledText>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={Colors.grey} />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.settingsItem}>
+                <View style={styles.settingsLeft}>
+                  <Ionicons name="person-outline" size={20} color={Colors.black} />
+                  <StyledText style={styles.settingsLabel}>Profile</StyledText>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={Colors.grey} />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.settingsItem}>
+                <View style={styles.settingsLeft}>
+                  <Ionicons name="exit-outline" size={20} color={Colors.black} />
+                  <StyledText style={styles.settingsLabel}>Log out</StyledText>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={Colors.grey} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <Modal visible={isSubmitOpen} transparent animationType="slide" onRequestClose={() => setIsSubmitOpen(false)}>
         <View style={styles.modalBackdrop}>
@@ -133,8 +222,8 @@ export default function HomeScreen() {
                   setIsSubmitOpen(false);
                   alert('Submitted!');
                 } catch (e) {
-                  console.error(e);
-                  alert('Failed to submit');
+                  console.error('Submit error', e?.response?.status, e?.response?.data || e?.message);
+                  alert(`Failed to submit: ${e?.response?.data?.error || e?.message}`);
                 }
               }}
             >
@@ -189,16 +278,59 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     backgroundColor: 'white',
-    padding: 22,
+    padding: 16,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '85%',
-    paddingBottom: 28,
-    marginBottom: 12,
+    paddingBottom: 16,
+    marginBottom: 8,
   },
   modalTitle: {
-    fontSize: 22,
-    marginBottom: 6,
+    fontSize: 20,
+  },
+  sheetHandle: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    backgroundColor: '#e5e7eb',
+    borderRadius: 999,
+    marginBottom: 12,
+  },
+  settingsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+    marginBottom: 8,
+  },
+  closeButton: {
+    padding: 6,
+    borderRadius: 999,
+    backgroundColor: '#f3f4f6',
+  },
+  settingsList: {
+    marginTop: 8,
+    backgroundColor: '#f9fafb',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  settingsItem: {
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  settingsLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  settingsLabel: {
+    fontSize: 16,
+    color: Colors.black,
   },
   modalSubtitle: {
     color: Colors.grey,
@@ -232,5 +364,10 @@ const styles = StyleSheet.create({
   cancelLink: {
     marginTop: 16,
     alignItems: 'center',
+  },
+  settingRow: {
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
 });
