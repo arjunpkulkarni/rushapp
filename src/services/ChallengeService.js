@@ -22,3 +22,8 @@ export const submitProof = async ({ challengeId, campusId, videoUri }) => {
   const res = await API.post('/submissions', form);
   return res.data;
 };
+
+export const getChallengeStats = async (challengeId) => {
+  const res = await API.get(`/challenges/${challengeId}/stats`);
+  return res.data; // { verifiedCount }
+};

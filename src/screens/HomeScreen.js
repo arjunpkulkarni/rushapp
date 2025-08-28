@@ -5,8 +5,8 @@ import { Colors } from '../constants/Colors';
 import { StyledText } from '../components/StyledText';
 import ChallengeCard from '../components/ChallengeCard';
 import FeaturedChallengeCard from '../components/FeaturedChallengeCard';
-import { getChallenges } from '../services/ChallengeService';
-import { submitProof } from '../services/ChallengeService';
+import { getChallenges, submitProof, getChallengeStats } from '../services/ChallengeService';
+import { createBuyIn, getBuyInStatus } from '../services/BuyInService';
 import * as ImagePicker from 'expo-image-picker';
 import { getFeaturedChallenge } from '../services/FeaturedChallenge';
 import { useChallenge } from '../store/useChallenge';
@@ -24,6 +24,9 @@ export default function HomeScreen() {
   const [now, setNow] = useState(Date.now());
   const [pastChallenges, setPastChallenges] = useState([]);
   const { phase, current } = useChallenge();
+  const [hasBuyIn, setHasBuyIn] = useState(false);
+  const [buyInLoading, setBuyInLoading] = useState(false);
+  const [completions, setCompletions] = useState(0);
 
   useEffect(() => {
     const fetchChallenges = async () => {
@@ -47,6 +50,39 @@ export default function HomeScreen() {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
+
+  // Poll live completions for the current challenge
+  useEffect(() => {
+    let id;
+    if (phase === 'live' && current) {
+      const tick = async () => {
+        try {
+          const stats = await getChallengeStats(current.id);
+          setCompletions(stats?.verifiedCount || 0);
+        } catch {}
+      };
+      tick();
+      id = setInterval(tick, 5000);
+    }
+    return () => id && clearInterval(id);
+  }, [phase, current?.id]);
+
+  // Check buy-in status for tomorrow (UTC)
+  useEffect(() => {
+    (async () => {
+      try {
+        const nowDate = new Date();
+        const tomorrow = new Date(nowDate.getTime() + 24 * 60 * 60 * 1000);
+        const yyyy = tomorrow.getUTCFullYear();
+        const mm = String(tomorrow.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(tomorrow.getUTCDate()).padStart(2, '0');
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+        const campusId = (current?.campusId) || 'clysjrz2u000008l5d2l983s0';
+        const status = await getBuyInStatus({ campusId, date: dateStr });
+        setHasBuyIn(!!status?.hasBuyIn);
+      } catch {}
+    })();
+  }, [current?.campusId, now]);
 
   // Partition into upcoming, active, and past based on scheduledAt/expiresAt
   const partitioned = React.useMemo(() => {
@@ -108,6 +144,7 @@ export default function HomeScreen() {
                 targetIso={current.expiresAt}
                 disabled={false}
                 isLive
+                completions={completions}
                 onSubmit={() => {
                   setActiveChallenge(current);
                   setVideoUri('');
@@ -155,6 +192,37 @@ export default function HomeScreen() {
           })}
         </View>
       </ScrollView>
+
+      {/* Buy-in CTA */}
+      <View style={styles.buyInBar}>
+        <StyledText style={{ color: Colors.black }}>
+          {hasBuyIn ? 'You are in for tomorrow' : 'Buy in before midnight to play tomorrow'}
+        </StyledText>
+        <TouchableOpacity
+          disabled={hasBuyIn || buyInLoading}
+          style={[styles.buyInBtn, (hasBuyIn || buyInLoading) && { opacity: 0.5 }]}
+          onPress={async () => {
+            try {
+              setBuyInLoading(true);
+              const nowDate = new Date();
+              const tomorrow = new Date(nowDate.getTime() + 24 * 60 * 60 * 1000);
+              const yyyy = tomorrow.getUTCFullYear();
+              const mm = String(tomorrow.getUTCMonth() + 1).padStart(2, '0');
+              const dd = String(tomorrow.getUTCDate()).padStart(2, '0');
+              const dateStr = `${yyyy}-${mm}-${dd}`;
+              const campusId = (current?.campusId) || 'clysjrz2u000008l5d2l983s0';
+              await createBuyIn({ campusId, date: dateStr, amount: 1 });
+              setHasBuyIn(true);
+            } catch (e) {
+              alert('Failed to buy in');
+            } finally {
+              setBuyInLoading(false);
+            }
+          }}
+        >
+          <StyledText semibold style={{ color: Colors.white }}>{hasBuyIn ? 'Ready' : 'Buy In'}</StyledText>
+        </TouchableOpacity>
+      </View>
 
       {/* Settings Modal */}
       <Modal visible={isSettingsOpen} transparent animationType="slide" onRequestClose={() => setIsSettingsOpen(false)}>
@@ -296,6 +364,23 @@ const styles = StyleSheet.create({
   cardContainer: {
     width: '100%',
     paddingHorizontal: 16,
+  },
+  buyInBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#eef2ff',
+    borderRadius: 14,
+    marginHorizontal: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    marginTop: 12,
+  },
+  buyInBtn: {
+    backgroundColor: Colors.deepPurple,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
   },
   modalBackdrop: {
     flex: 1,

@@ -87,13 +87,16 @@ export default function LeaderboardScreen({ navigation }) {
   const [pastChallenges, setPastChallenges] = useState([]);
   const [showPastModal, setShowPastModal] = useState(false);
   const [now, setNow] = useState(Date.now());
+  const [selectedPeriod, setSelectedPeriod] = useState('overall'); // 'daily' | 'weekly' | 'monthly' | 'overall'
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
+        setLoading(true);
+        setError(null);
         // TODO: Replace with dynamic campus ID
         const campusId = 'clysjrz2u000008l5d2l983s0';
-        const response = await api.get(`/leaderboard?campusId=${campusId}`);
+        const response = await api.get(`/leaderboard?campusId=${campusId}&period=${selectedPeriod}`);
         setLeaderboardData(response.data);
       } catch (err) {
         setError('Failed to fetch leaderboard data.');
@@ -104,7 +107,7 @@ export default function LeaderboardScreen({ navigation }) {
     };
 
     fetchLeaderboard();
-  }, []);
+  }, [selectedPeriod]);
 
   // Fetch challenges to build Past Challenges list
   useEffect(() => {
@@ -180,7 +183,8 @@ export default function LeaderboardScreen({ navigation }) {
           Leaderboard
         </StyledText>
         <StyledText regular style={styles.headerSubtitle}>
-          Top Ranks in Champaign
+          {selectedPeriod === 'daily' && 'Daily top finishers'}
+          {selectedPeriod === 'overall' && 'Overall champs'}
         </StyledText>
         <TouchableOpacity
           style={styles.pastBtn}
@@ -189,6 +193,24 @@ export default function LeaderboardScreen({ navigation }) {
         >
           <Ionicons name="time-outline" size={28} color={Colors.black} />
         </TouchableOpacity>
+      </View>
+
+      {/* Period Selector */}
+      <View style={styles.periodTabs}>
+        {['daily','overall'].map((p) => {
+          const selected = p === selectedPeriod;
+          const label = p.charAt(0).toUpperCase() + p.slice(1);
+          return (
+            <TouchableOpacity
+              key={p}
+              style={[styles.periodTab, selected && styles.periodTabSelected]}
+              onPress={() => setSelectedPeriod(p)}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.periodTabText, selected && styles.periodTabTextSelected]}>{label}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       <View style={styles.podiumContainer}>
@@ -341,7 +363,31 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: 'center',
     marginTop: 0,
-    marginBottom: 12,
+    marginBottom: 0,
+  },
+  periodTabs: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    backgroundColor: '#eef2ff',
+    borderRadius: 999,
+    padding: 6,
+    marginBottom: 4,
+    gap: 6,
+  },
+  periodTab: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+  },
+  periodTabSelected: {
+    backgroundColor: Colors.deepPurple,
+  },
+  periodTabText: {
+    color: Colors.black,
+    fontSize: 12,
+  },
+  periodTabTextSelected: {
+    color: Colors.white,
   },
   pastBtn: {
     position: 'absolute',
