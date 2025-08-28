@@ -14,19 +14,27 @@ export default function ChallengeCard({ title, description, onSubmit, timeRemain
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <View style={styles.header}>
-        {isLive && (
-          <View style={styles.liveBadge}>
-            <View style={styles.liveDot} />
-            <StyledText style={styles.liveText}>LIVE</StyledText>
+      <View style={styles.headerRow}>
+        <View style={styles.headerLeft}>
+          {isLive && (
+            <View style={styles.liveBadge}>
+              <View style={styles.liveDot} />
+              <StyledText style={styles.liveText}>LIVE</StyledText>
+            </View>
+          )}
+          <StyledText medium style={styles.title}>
+            {title}
+          </StyledText>
+          <StyledText regular style={styles.description}>
+            {description}
+          </StyledText>
+        </View>
+        {typeof completions === 'number' && (
+          <View style={styles.completionsPill}>
+            <Ionicons name="people-outline" size={16} color={Colors.white} style={{ marginRight: 6 }} />
+            <StyledText style={styles.timeText}>{completions} completed</StyledText>
           </View>
         )}
-        <StyledText medium style={styles.title}>
-          {title}
-        </StyledText>
-        <StyledText regular style={styles.description}>
-          {description}
-        </StyledText>
       </View>
       <View style={styles.graphicContainer}>
         <Image
@@ -43,25 +51,18 @@ export default function ChallengeCard({ title, description, onSubmit, timeRemain
             <StyledText style={styles.timeText}>{timeLabel}: {timeRemaining}</StyledText>
           )}
         </View>
-        {typeof completions === 'number' && (
-          <View style={styles.completionsPill}>
-            <Ionicons name="people-outline" size={16} color={Colors.white} style={{ marginRight: 6 }} />
-            <StyledText style={styles.timeText}>{completions} completed</StyledText>
-          </View>
-        )}
-        <TouchableOpacity disabled={disabled} style={[styles.customizeButton, disabled && { opacity: 0.5 }]} onPress={onSubmit}>
-          <Ionicons
-            name="create-outline"
-            size={20}
-            color={Colors.white}
-            style={{ marginRight: 8 }}
-          />
-          <StyledText medium style={styles.buttonText}>
-            Submit Proof
-          </StyledText>
-        </TouchableOpacity>
-        
       </View>
+
+      {/* Submit bottom-right */}
+      <TouchableOpacity
+        disabled={disabled}
+        onPress={onSubmit}
+        style={[styles.submitBottomRight, disabled && { opacity: 0.6 }]}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
+        <Ionicons name="create-outline" size={16} color={Colors.white} style={{ marginRight: 6 }} />
+        <StyledText style={[styles.timeText, styles.submitBottomRightText]}>Submit Proof</StyledText>
+      </TouchableOpacity>
     </LinearGradient>
   );
 }
@@ -71,16 +72,23 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 32,
     padding: 24,
-    alignItems: 'center',
+    alignItems: 'stretch',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 10,
     elevation: 5,
   },
-  header: {
-    alignSelf: 'flex-start',
-    marginBottom: 24,
+  headerRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  headerLeft: {
+    flexShrink: 1,
+    paddingRight: 12,
   },
   liveBadge: {
     alignSelf: 'flex-start',
@@ -104,6 +112,7 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 14,
     color: Colors.white,
+    opacity: 0.9,
   },
   graphicContainer: {
     width: 200,
@@ -112,7 +121,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 24,
+    alignSelf: 'center',
+    marginBottom: 20,
   },
   graphic: {
     width: '100%',
@@ -122,8 +132,9 @@ const styles = StyleSheet.create({
   footer: {
     width: '100%',
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
+    paddingRight: 90,
   },
   timePill: {
     flexDirection: 'row',
@@ -145,22 +156,19 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
   },
-  customizeButton: {
+  submitBottomRight: {
+    position: 'absolute',
+    right: 24,
+    bottom: 24,
     flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: 25,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 25,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
   },
-  buttonText: {
+  submitBottomRightText: {
     color: Colors.white,
-    fontSize: 14,
-  },
-  playButton: {
-    backgroundColor: Colors.white,
-    borderRadius: 25,
-    padding: 12,
   },
 });
 

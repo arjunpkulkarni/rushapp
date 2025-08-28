@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, StyleSheet, View, TouchableOpacity, ScrollView, Modal, Text } from 'react-native';
+import { SafeAreaView, StyleSheet, View, TouchableOpacity, ScrollView, Modal, Text, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Colors } from '../constants/Colors';
@@ -28,6 +28,8 @@ export default function HomeScreen() {
   const [hasBuyIn, setHasBuyIn] = useState(false);
   const [buyInLoading, setBuyInLoading] = useState(false);
   const [completions, setCompletions] = useState(0);
+  const [potIndex, setPotIndex] = useState(0);
+  const potOpacity = React.useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const fetchChallenges = async () => {
@@ -106,6 +108,28 @@ export default function HomeScreen() {
     return { upcoming, active, past };
   }, [challenges, now]);
 
+  const potentialList = React.useMemo(() => {
+    const titles = [
+      ...partitioned.upcoming.filter((c) => !c.isBonus).slice(0, 3).map((c) => c.title),
+    ];
+    if (titles.length >= 3) return titles;
+    const filler = ['Campus Dash', 'Quad Sprint', 'Library Ladder'];
+    while (titles.length < 3) titles.push(filler[titles.length % filler.length]);
+    return titles;
+  }, [partitioned.upcoming]);
+
+  useEffect(() => {
+    if (!potentialList.length) return;
+    const id = setInterval(() => {
+      Animated.timing(potOpacity, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => {
+        setPotIndex((i) => (i + 1) % potentialList.length);
+        Animated.timing(potOpacity, { toValue: 1, duration: 250, useNativeDriver: true }).start();
+      });
+    }, 2500);
+    return () => clearInterval(id);
+  }, [potentialList.length]);
+
+
   useEffect(() => {
     setPastChallenges(partitioned.past);
   }, [partitioned.past]);
@@ -140,7 +164,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.cardContainer}>
-          {phase === 'live' && current && (
+          {phase === 'live' && current ? (
             <View style={{ marginBottom: 16 }}>              
               <View style={{ height: 8 }} />
               <ChallengeCard
@@ -160,7 +184,30 @@ export default function HomeScreen() {
                 }}
               />
             </View>
+          ) : (
+            <View style={styles.placeholderCard}>
+              <Ionicons name="alarm-outline" size={18} color={Colors.grey} style={{ marginRight: 8 }} />
+              <StyledText style={{ color: Colors.grey }}>Today's challenge will drop soon. Stay ready.</StyledText>
+            </View>
           )}
+
+          {/* Last Challenge Box - placed directly under live/placeholder */}
+          <View style={styles.lastCard}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+              <Ionicons name="trophy-outline" size={18} color={Colors.black} style={{ marginRight: 6 }} />
+              <StyledText semibold>Last Challenge</StyledText>
+            </View>
+            {partitioned.past.length > 0 ? (
+              <View>
+                <StyledText style={{ color: Colors.black }}>{partitioned.past[partitioned.past.length - 1].title}</StyledText>
+                <StyledText style={{ color: Colors.grey, marginTop: 2 }} numberOfLines={2}>
+                  {partitioned.past[partitioned.past.length - 1].description}
+                </StyledText>
+              </View>
+            ) : (
+              <StyledText style={{ color: Colors.grey }}>No past challenges yet.</StyledText>
+            )}
+          </View>
           {featuredChallenge && (
             <FeaturedChallengeCard
               title={featuredChallenge.title}
@@ -223,6 +270,14 @@ export default function HomeScreen() {
               <Countdown style={styles.buyInCountdownText} prefix={'Time left: '} target={midnightIso} />
             </View>
           )}
+
+          {/* Potential challenges carousel */}
+          <View style={styles.potentialContainer}>
+            <StyledText style={styles.potentialHeader}>Potential challenges</StyledText>
+            <Animated.View style={{ opacity: potOpacity }}>
+              <StyledText style={styles.potentialItem}>• {potentialList[potIndex]}</StyledText>
+            </Animated.View>
+          </View>
         </View>
         <TouchableOpacity
           disabled={hasBuyIn || buyInLoading}
@@ -395,6 +450,23 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 16,
   },
+  placeholderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f3f4f6',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    marginBottom: 12,
+  },
+  lastCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    marginHorizontal: 16,
+    marginBottom: 8,
+  },
   buyInCard: {
     marginHorizontal: 16,
     marginBottom: 12,
@@ -447,6 +519,17 @@ const styles = StyleSheet.create({
   },
   buyInCTAText: {
     color: Colors.deepPurple,
+  },
+  potentialContainer: {
+    marginTop: 10,
+  },
+  potentialHeader: {
+    color: 'rgba(255,255,255,0.85)',
+    marginBottom: 6,
+    fontSize: 12,
+  },
+  potentialItem: {
+    color: Colors.white,
   },
   modalBackdrop: {
     flex: 1,
