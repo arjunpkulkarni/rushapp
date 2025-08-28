@@ -9,6 +9,9 @@ import { getChallenges } from '../services/ChallengeService';
 import { submitProof } from '../services/ChallengeService';
 import * as ImagePicker from 'expo-image-picker';
 import { getFeaturedChallenge } from '../services/FeaturedChallenge';
+import { useChallenge } from '../store/useChallenge';
+import LiveBanner from '../components/LiveBanner';
+import Countdown from '../components/Countdown';
 
 export default function HomeScreen() {
   const [challenges, setChallenges] = useState([]);
@@ -20,6 +23,7 @@ export default function HomeScreen() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [pastChallenges, setPastChallenges] = useState([]);
+  const { phase, current } = useChallenge();
 
   useEffect(() => {
     const fetchChallenges = async () => {
@@ -93,6 +97,26 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.cardContainer}>
+          {phase === 'live' && current && (
+            <View style={{ marginBottom: 16 }}>              
+              <View style={{ height: 8 }} />
+              <ChallengeCard
+                title={current.title}
+                description={current.description}
+                timeRemaining={''}
+                timeLabel={'Ends in'}
+                targetIso={current.expiresAt}
+                disabled={false}
+                isLive
+                onSubmit={() => {
+                  setActiveChallenge(current);
+                  setVideoUri('');
+                  setPickedAt(null);
+                  setIsSubmitOpen(true);
+                }}
+              />
+            </View>
+          )}
           {featuredChallenge && (
             <FeaturedChallengeCard
               title={featuredChallenge.title}
@@ -102,8 +126,8 @@ export default function HomeScreen() {
               image="https://www.insidehighered.com/sites/default/files/media/iStock-1436447934.jpg"
             />
           )}
-          {[
-            ...partitioned.active.filter((c) => !c.isBonus),
+          {[ 
+            ...partitioned.active.filter((c) => !c.isBonus && (!current || c.id !== current.id)),
             ...partitioned.upcoming.filter((c) => !c.isBonus),
           ].map((challenge) => {
             const isActive = new Date(challenge.scheduledAt).getTime() <= now && new Date(challenge.expiresAt).getTime() > now;
@@ -116,7 +140,9 @@ export default function HomeScreen() {
                 description={challenge.description}
                 timeRemaining={formatRemaining(timeTarget)}
                 timeLabel={timeLabel}
+                targetIso={timeTarget}
                 disabled={!isActive}
+                isLive={isActive && current && current.id === challenge.id}
                 onSubmit={() => {
                   if (!isActive) return;
                   setActiveChallenge(challenge);

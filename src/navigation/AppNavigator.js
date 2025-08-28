@@ -11,6 +11,9 @@ import HistoryScreen from '../screens/HistoryScreen';
 import RewardsScreen from '../screens/RewardsScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import { Colors } from '../constants/Colors';
+import { connectSocket } from '../lib/socket';
+import { startFallbackPoller, stopFallbackPoller } from '../lib/poller';
+import Constants from 'expo-constants';
 import { StyledText } from '../components/StyledText';
 
 const Tab = createBottomTabNavigator();
@@ -72,6 +75,18 @@ export default function AppNavigator() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (initialRoute !== 'Main') return;
+    const campusId = Constants.expoConfig?.extra?.CAMPUS_ID || 'uiuc123';
+    // TODO: Replace with real user id
+    const userId = 'debug-user';
+    try {
+      connectSocket({ campusId, userId });
+    } catch {}
+    startFallbackPoller();
+    return () => stopFallbackPoller();
+  }, [initialRoute]);
 
   if (!initialRoute) {
     return (

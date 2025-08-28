@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import Countdown from './Countdown';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { StyledText } from './StyledText';
 import { Colors } from '../constants/Colors';
 
-export default function ChallengeCard({ title, description, onSubmit, timeRemaining, timeLabel = 'Time', disabled }) {
+export default function ChallengeCard({ title, description, onSubmit, timeRemaining, timeLabel = 'Time', disabled, targetIso, isLive }) {
   return (
     <LinearGradient
       colors={[Colors.electricBlue, Colors.lightPurple]}
@@ -14,6 +15,12 @@ export default function ChallengeCard({ title, description, onSubmit, timeRemain
       end={{ x: 1, y: 1 }}
     >
       <View style={styles.header}>
+        {isLive && (
+          <View style={styles.liveBadge}>
+            <View style={styles.liveDot} />
+            <StyledText style={styles.liveText}>LIVE</StyledText>
+          </View>
+        )}
         <StyledText medium style={styles.title}>
           {title}
         </StyledText>
@@ -30,7 +37,11 @@ export default function ChallengeCard({ title, description, onSubmit, timeRemain
       <View style={styles.footer}>
         <View style={styles.timePill}>
           <Ionicons name="time-outline" size={16} color={Colors.white} style={{ marginRight: 6 }} />
-          <StyledText style={styles.timeText}>{timeLabel}: {timeRemaining}</StyledText>
+          {targetIso ? (
+            <Countdown style={styles.timeText} prefix={`${timeLabel}: `} target={targetIso} />
+          ) : (
+            <StyledText style={styles.timeText}>{timeLabel}: {timeRemaining}</StyledText>
+          )}
         </View>
         <TouchableOpacity disabled={disabled} style={[styles.customizeButton, disabled && { opacity: 0.5 }]} onPress={onSubmit}>
           <Ionicons
@@ -65,6 +76,20 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginBottom: 24,
   },
+  liveBadge: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(239,68,68,0.25)',
+    borderColor: '#EF4444',
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    marginBottom: 8,
+  },
+  liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#EF4444', marginRight: 6 },
+  liveText: { color: Colors.white, fontSize: 12 },
   title: {
     fontSize: 18,
     color: Colors.white,

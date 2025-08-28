@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, View, FlatList, Image, TouchableOpacity, ActivityIndicator, Linking } from 'react-native';
+import { SafeAreaView, StyleSheet, View, FlatList, Image, TouchableOpacity, ActivityIndicator, Linking, NativeModules } from 'react-native';
+import { VideoView } from 'expo-video';
 import { StyledText } from '../components/StyledText';
 import { Colors } from '../constants/Colors';
 import API from '../api/api';
@@ -20,7 +21,7 @@ export default function FeedScreen() {
           return;
         }
         const res = await API.get(`/submissions/feed/${campusId}`);
-        setItems(res.data || []);
+        setItems(res.data?.items || []);
       } catch (e) {
         setError('Failed to load feed');
         console.error(e);
@@ -55,20 +56,38 @@ export default function FeedScreen() {
     );
   }
 
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <View style={styles.row}>
-        <Image source={{ uri: item.user?.profileImage || `https://i.pravatar.cc/150?u=${item.user?.id}` }} style={styles.avatar} />
-        <View style={{ flex: 1 }}>
-          <StyledText semibold style={{ color: Colors.black }}>{item.user?.username || 'User'}</StyledText>
-          <StyledText style={{ color: Colors.grey }}>{new Date(item.createdAt).toLocaleString()}</StyledText>
+  const avAvailable = !!NativeModules?.ExpoVideoModule;
+  const renderItem = ({ item }) => {
+    const mediaUrl = item.mediaUrl.startsWith('http') ? item.mediaUrl : `${API.defaults.baseURL?.replace('/api/v1','')}${item.mediaUrl}`;
+    return (
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <Image source={{ uri: item.user?.profileImage || `https://i.pravatar.cc/150?u=${item.user?.id}` }} style={styles.avatar} />
+          <View style={{ flex: 1 }}>
+            <StyledText semibold style={{ color: Colors.black }}>{item.user?.username || item.user?.name || 'User'}</StyledText>
+            <StyledText style={{ color: Colors.grey }}>{item.challenge?.title || 'Challenge'}</StyledText>
+          </View>
         </View>
-        <TouchableOpacity onPress={() => Linking.openURL(item.mediaUrl.startsWith('http') ? item.mediaUrl : `${API.defaults.baseURL?.replace('/api/v1','')}${item.mediaUrl}`)} style={styles.watchBtn}>
-          <StyledText style={{ color: 'white' }}>Watch</StyledText>
-        </TouchableOpacity>
+        <View style={{ height: 8 }} />
+        {avAvailable ? (
+          <VideoView
+            style={styles.video}
+            source={{ uri: mediaUrl }}
+            allowsFullscreen
+            allowsPictureInPicture
+            nativeControls
+            contentFit="cover"
+          />
+        ) : (
+          <TouchableOpacity onPress={() => Linking.openURL(mediaUrl)} style={styles.watchBtn}>
+            <StyledText style={{ color: 'white' }}>Watch</StyledText>
+          </TouchableOpacity>
+        )}
+        <View style={{ height: 6 }} />
+        <StyledText style={{ color: Colors.grey, fontSize: 12 }}>{new Date(item.createdAt).toLocaleString()}</StyledText>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.screen}>

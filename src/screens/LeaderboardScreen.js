@@ -187,7 +187,7 @@ export default function LeaderboardScreen({ navigation }) {
           onPress={() => setShowPastModal(true)}
           hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
         >
-          <Ionicons name="time-outline" size={20} color={Colors.black} />
+          <Ionicons name="time-outline" size={28} color={Colors.black} />
         </TouchableOpacity>
       </View>
 
@@ -198,7 +198,7 @@ export default function LeaderboardScreen({ navigation }) {
       </View>
 
       <FlatList
-        data={rest}
+        data={leaderboardData}
         renderItem={({ item }) => <ListItem user={item} />}
         keyExtractor={(item) => item.id}
         style={styles.list}
@@ -258,7 +258,7 @@ const podiumStyles = (rank) => {
       backgroundColor = Colors.gold;
       rankBadgeSize = 30;
       rankBadgePosition = -5;
-      nameMarginTop = 12;
+      nameMarginTop = 8;
       podiumPosition = { top: 0 };
       break;
     case 2:
@@ -266,7 +266,7 @@ const podiumStyles = (rank) => {
       backgroundColor = Colors.silver;
       rankBadgeSize = 25;
       rankBadgePosition = -5;
-      nameMarginTop = 10;
+      nameMarginTop = 6;
       podiumPosition = { top: 50 };
       break;
     case 3:
@@ -274,7 +274,7 @@ const podiumStyles = (rank) => {
       backgroundColor = Colors.bronze;
       rankBadgeSize = 20;
       rankBadgePosition = -5;
-      nameMarginTop = 8;
+      nameMarginTop = 4;
       podiumPosition = { top: 80 };
       break;
   }
@@ -340,14 +340,14 @@ const styles = StyleSheet.create({
   header: {
     padding: 24,
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 0,
     marginBottom: 12,
   },
   pastBtn: {
     position: 'absolute',
     right: 16,
     top: 26,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: 'transparent',
     borderRadius: 16,
     padding: 6,
   },
@@ -390,7 +390,6 @@ const styles = StyleSheet.create({
     width: 24,
     textAlign: 'center',
   },
-
   listAvatar: {
     width: 40,
     height: 40,
@@ -401,6 +400,7 @@ const styles = StyleSheet.create({
     color: Colors.grey,
     fontSize: 16,
     flex: 1,
+    marginLeft: 8,
   },
   listScoreContainer: {
     backgroundColor: Colors.lightPurple,
