@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, View, TouchableOpacity, ScrollView, Modal, Text } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Colors } from '../constants/Colors';
 import { StyledText } from '../components/StyledText';
@@ -83,6 +84,12 @@ export default function HomeScreen() {
       } catch {}
     })();
   }, [current?.campusId, now]);
+
+  const midnightIso = React.useMemo(() => {
+    const d = new Date();
+    d.setHours(24, 0, 0, 0);
+    return d.toISOString();
+  }, [now]);
 
   // Partition into upcoming, active, and past based on scheduledAt/expiresAt
   const partitioned = React.useMemo(() => {
@@ -194,13 +201,32 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* Buy-in CTA */}
-      <View style={styles.buyInBar}>
-        <StyledText style={{ color: Colors.black }}>
-          {hasBuyIn ? 'You are in for tomorrow' : 'Buy in before midnight to play tomorrow'}
-        </StyledText>
+      <LinearGradient
+        colors={[Colors.electricBlue, Colors.lightPurple]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.buyInCard}
+      >
+        <View style={styles.buyInLeft}>
+          <View style={styles.buyInTitleRow}>
+            <Ionicons name={hasBuyIn ? 'checkmark-circle' : 'flash-outline'} size={18} color={Colors.white} style={{ marginRight: 6 }} />
+            <StyledText semibold style={styles.buyInTitle}>
+              {hasBuyIn ? "You're in for tomorrow" : 'Buy in by midnight'}
+            </StyledText>
+          </View>
+          <StyledText style={styles.buyInSubtitle}>
+            {hasBuyIn ? 'See you on the starting line.' : "Lock your spot for tomorrow's challenge."}
+          </StyledText>
+          {!hasBuyIn && (
+            <View style={styles.buyInCountdownPill}>
+              <Ionicons name="time-outline" size={14} color={Colors.white} style={{ marginRight: 6 }} />
+              <Countdown style={styles.buyInCountdownText} prefix={'Time left: '} target={midnightIso} />
+            </View>
+          )}
+        </View>
         <TouchableOpacity
           disabled={hasBuyIn || buyInLoading}
-          style={[styles.buyInBtn, (hasBuyIn || buyInLoading) && { opacity: 0.5 }]}
+          style={[styles.buyInCTA, hasBuyIn && styles.buyInCTAReady, (hasBuyIn || buyInLoading) && { opacity: 0.85 }]}
           onPress={async () => {
             try {
               setBuyInLoading(true);
@@ -219,10 +245,14 @@ export default function HomeScreen() {
               setBuyInLoading(false);
             }
           }}
+          activeOpacity={0.9}
         >
-          <StyledText semibold style={{ color: Colors.white }}>{hasBuyIn ? 'Ready' : 'Buy In'}</StyledText>
+          <Ionicons name={hasBuyIn ? 'checkmark' : 'rocket-outline'} size={18} color={hasBuyIn ? Colors.white : Colors.deepPurple} style={{ marginRight: 8 }} />
+          <StyledText semibold style={[styles.buyInCTAText, hasBuyIn && { color: Colors.white }]}>
+            {hasBuyIn ? 'Ready' : 'Buy In $1'}
+          </StyledText>
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       {/* Settings Modal */}
       <Modal visible={isSettingsOpen} transparent animationType="slide" onRequestClose={() => setIsSettingsOpen(false)}>
@@ -365,22 +395,58 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 16,
   },
-  buyInBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#eef2ff',
-    borderRadius: 14,
+  buyInCard: {
     marginHorizontal: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    marginBottom: 12,
     marginTop: 12,
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  buyInBtn: {
-    backgroundColor: Colors.deepPurple,
+  buyInLeft: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  buyInTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  buyInTitle: {
+    color: Colors.white,
+  },
+  buyInSubtitle: {
+    color: 'rgba(255,255,255,0.9)',
+    marginBottom: 8,
+  },
+  buyInCountdownPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    alignSelf: 'flex-start',
+  },
+  buyInCountdownText: {
+    color: Colors.white,
+    fontSize: 12,
+  },
+  buyInCTA: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    paddingHorizontal: 14,
     paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 999,
+  },
+  buyInCTAReady: {
+    backgroundColor: '#22c55e',
+  },
+  buyInCTAText: {
+    color: Colors.deepPurple,
   },
   modalBackdrop: {
     flex: 1,
