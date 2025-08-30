@@ -31,4 +31,14 @@ export const connectSocket = ({ campusId, userId }) => {
 
 export const getSocket = () => socket;
 
+export const disconnectSocket = () => {
+  try {
+    if (socket && socket.connected) {
+      socket.removeAllListeners();
+      socket.disconnect();
+    }
+  } catch {}
+  socket = undefined;
+};
+
 

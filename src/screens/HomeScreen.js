@@ -13,6 +13,13 @@ import { getFeaturedChallenge } from '../services/FeaturedChallenge';
 import { useChallenge } from '../store/useChallenge';
 import LiveBanner from '../components/LiveBanner';
 import Countdown from '../components/Countdown';
+import API from '../api/api';
+import * as SecureStore from 'expo-secure-store';
+import { disconnectSocket } from '../lib/socket';
+import { stopFallbackPoller } from '../lib/poller';
+import { useAtom } from 'jotai';
+import { userAtom } from '../state/atoms';
+import { useNavigation } from '@react-navigation/native';
 
 export default function HomeScreen() {
   const [challenges, setChallenges] = useState([]);
@@ -30,6 +37,8 @@ export default function HomeScreen() {
   const [completions, setCompletions] = useState(0);
   const [potIndex, setPotIndex] = useState(0);
   const potOpacity = React.useRef(new Animated.Value(1)).current;
+  const navigation = useNavigation();
+  const [, setUser] = useAtom(userAtom);
 
   useEffect(() => {
     const fetchChallenges = async () => {
@@ -129,7 +138,6 @@ export default function HomeScreen() {
     return () => clearInterval(id);
   }, [potentialList.length]);
 
-
   useEffect(() => {
     setPastChallenges(partitioned.past);
   }, [partitioned.past]);
@@ -145,6 +153,15 @@ export default function HomeScreen() {
     const mm = minutes.toString().padStart(2, '0');
     const ss = seconds.toString().padStart(2, '0');
     return `${hh}:${mm}:${ss}`;
+  };
+
+  const handleLogout = async () => {
+    try { await SecureStore.deleteItemAsync('userToken'); } catch {}
+    try { delete API.defaults.headers.common['Authorization']; } catch {}
+    try { stopFallbackPoller(); disconnectSocket(); } catch {}
+    setUser(null);
+    setIsSettingsOpen(false);
+    navigation.reset({ index: 0, routes: [{ name: 'Onboarding' }] });
   };
 
   return (
@@ -176,6 +193,7 @@ export default function HomeScreen() {
                 disabled={false}
                 isLive
                 completions={completions}
+                imageUrl={current.mediaUrl}
                 onSubmit={() => {
                   setActiveChallenge(current);
                   setVideoUri('');
@@ -234,6 +252,7 @@ export default function HomeScreen() {
                 targetIso={timeTarget}
                 disabled={!isActive}
                 isLive={isActive && current && current.id === challenge.id}
+                imageUrl={challenge.mediaUrl}
                 onSubmit={() => {
                   if (!isActive) return;
                   setActiveChallenge(challenge);
@@ -335,7 +354,7 @@ export default function HomeScreen() {
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={Colors.grey} />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.settingsItem}>
+              <TouchableOpacity style={styles.settingsItem} onPress={handleLogout}>
                 <View style={styles.settingsLeft}>
                   <Ionicons name="exit-outline" size={20} color={Colors.black} />
                   <StyledText style={styles.settingsLabel}>Log out</StyledText>

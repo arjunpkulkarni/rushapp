@@ -17,6 +17,8 @@ import UserService from '../services/UserService';
 import API from '../api/api';
 import { useAtom } from 'jotai';
 import { userAtom } from '../state/atoms';
+import { disconnectSocket } from '../lib/socket';
+import { stopFallbackPoller } from '../lib/poller';
 
 export default function ProfileScreen({ navigation }) {
   const [user, setUser] = useAtom(userAtom);
@@ -52,6 +54,22 @@ export default function ProfileScreen({ navigation }) {
     const first = parts[0]?.[0] || '';
     const last = parts.length > 1 ? (parts[parts.length - 1][0] || '') : '';
     return (first + last).toUpperCase();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await SecureStore.deleteItemAsync('userToken');
+    } catch {}
+    try {
+      delete API.defaults.headers.common['Authorization'];
+    } catch {}
+    try {
+      stopFallbackPoller();
+      disconnectSocket();
+    } catch {}
+    setUser(null);
+    setShowSettings(false);
+    navigation.reset({ index: 0, routes: [{ name: 'Onboarding' }] });
   };
 
   return (
@@ -97,11 +115,7 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
             <StyledText semibold style={{ fontSize: 18, marginBottom: 8 }}>Settings</StyledText>
-            <TouchableOpacity style={styles.row} onPress={async () => {
-              await SecureStore.deleteItemAsync('userToken');
-              setShowSettings(false);
-              navigation.reset({ index: 0, routes: [{ name: 'Onboarding' }] });
-            }}>
+            <TouchableOpacity style={styles.row} onPress={handleLogout}>
               <StyledText semibold>Log out</StyledText>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.row, styles.rowDanger]} onPress={() => {
@@ -110,8 +124,7 @@ export default function ProfileScreen({ navigation }) {
                 { text: 'Delete', style: 'destructive', onPress: async () => {
                   try {
                     await API.delete('/users/me');
-                    await SecureStore.deleteItemAsync('userToken');
-                    navigation.reset({ index: 0, routes: [{ name: 'Onboarding' }] });
+                    await handleLogout();
                   } catch (e) {
                     Alert.alert('Error', 'Could not delete account');
                   }

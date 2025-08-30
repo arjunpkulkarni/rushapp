@@ -3,7 +3,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import { Provider } from 'jotai';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useCustomFonts } from './src/hooks/use-fonts';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, LogBox } from 'react-native';
+
+LogBox.ignoreLogs([
+  'useInsertionEffect must not schedule updates',
+  'RemoteTextInput',
+]);
 
 export default function App() {
   const fontsLoaded = useCustomFonts();

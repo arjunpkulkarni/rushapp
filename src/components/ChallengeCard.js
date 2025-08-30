@@ -5,8 +5,24 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { StyledText } from './StyledText';
 import { Colors } from '../constants/Colors';
+import API from '../api/api';
 
-export default function ChallengeCard({ title, description, onSubmit, timeRemaining, timeLabel = 'Time', disabled, targetIso, isLive, completions }) {
+const resolveImageUrl = (url) => {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  try {
+    const origin = new URL(API.defaults.baseURL).origin;
+    return `${origin}${url}`;
+  } catch {
+    // Fallback: strip /api/v1 from base and append
+    const base = (API.defaults.baseURL || '').replace(/\/api\/.*/, '');
+    return `${base}${url}`;
+  }
+};
+
+export default function ChallengeCard({ title, description, onSubmit, timeRemaining, timeLabel = 'Time', disabled, targetIso, isLive, completions, imageUrl }) {
+  const resolved = resolveImageUrl(imageUrl) || 'https://placekitten.com/200/200';
+
   return (
     <LinearGradient
       colors={[Colors.electricBlue, Colors.lightPurple]}
@@ -38,7 +54,7 @@ export default function ChallengeCard({ title, description, onSubmit, timeRemain
       </View>
       <View style={styles.graphicContainer}>
         <Image
-          source={{ uri: 'https://placekitten.com/200/200' }} // Replace with your image
+          source={{ uri: resolved }}
           style={styles.graphic}
         />
       </View>
