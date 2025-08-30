@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, View, FlatList, Image, TouchableOpacity, ActivityIndicator, Linking, NativeModules } from 'react-native';
+import { SafeAreaView, StyleSheet, View, FlatList, Image, ActivityIndicator } from 'react-native';
 import { VideoView } from 'expo-video';
 import { StyledText } from '../components/StyledText';
 import { Colors } from '../constants/Colors';
@@ -56,46 +56,45 @@ export default function FeedScreen() {
     );
   }
 
-  const avAvailable = !!NativeModules?.ExpoVideoModule;
   const renderItem = ({ item }) => {
     const mediaUrl = item.mediaUrl.startsWith('http') ? item.mediaUrl : `${API.defaults.baseURL?.replace('/api/v1','')}${item.mediaUrl}`;
     return (
-      <View style={styles.card}>
-        <View style={styles.row}>
+      <View style={styles.post}>
+        {/* Post header */}
+        <View style={styles.postHeader}>
           <Image source={{ uri: item.user?.profileImage || `https://i.pravatar.cc/150?u=${item.user?.id}` }} style={styles.avatar} />
           <View style={{ flex: 1 }}>
-            <StyledText semibold style={{ color: Colors.black }}>{item.user?.username || item.user?.name || 'User'}</StyledText>
-            <StyledText style={{ color: Colors.grey }}>{item.challenge?.title || 'Challenge'}</StyledText>
+            <StyledText semibold style={styles.username}>{item.user?.username || item.user?.name || 'User'}</StyledText>
+            <StyledText style={styles.subText}>{item.challenge?.title || 'Challenge'}</StyledText>
           </View>
+          <StyledText style={styles.timestamp}>{new Date(item.createdAt).toLocaleDateString()}</StyledText>
         </View>
-        <View style={{ height: 8 }} />
-        {avAvailable ? (
+        {/* Media */}
+        <View style={styles.mediaWrapper}>
           <VideoView
-            style={styles.video}
+            style={styles.media}
             source={{ uri: mediaUrl }}
+            nativeControls
             allowsFullscreen
             allowsPictureInPicture
-            nativeControls
             contentFit="cover"
           />
-        ) : (
-          <TouchableOpacity onPress={() => Linking.openURL(mediaUrl)} style={styles.watchBtn}>
-            <StyledText style={{ color: 'white' }}>Watch</StyledText>
-          </TouchableOpacity>
-        )}
-        <View style={{ height: 6 }} />
-        <StyledText style={{ color: Colors.grey, fontSize: 12 }}>{new Date(item.createdAt).toLocaleString()}</StyledText>
+        </View>
       </View>
     );
   };
 
   return (
     <SafeAreaView style={styles.screen}>
+      <View style={styles.header}>
+        <StyledText black style={styles.headerTitle}>Feed</StyledText>
+      </View>
       <FlatList
         data={items}
         keyExtractor={(it) => it.id}
         renderItem={renderItem}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
   );
@@ -106,33 +105,68 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.lightGrey,
   },
+  header: {
+    paddingTop: 8,
+    paddingBottom: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 20,
+    color: Colors.black,
+  },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.lightGrey,
   },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 12,
+  listContent: {
+    paddingHorizontal: 12,
+    paddingBottom: 16,
   },
-  row: {
+  post: {
+    backgroundColor: Colors.white,
+    marginBottom: 16,
+    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  postHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 10,
   },
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    marginRight: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
-  watchBtn: {
-    backgroundColor: Colors.deepPurple,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
+  username: {
+    color: Colors.black,
+  },
+  subText: {
+    color: Colors.grey,
+    fontSize: 12,
+  },
+  timestamp: {
+    color: Colors.grey,
+    fontSize: 12,
+  },
+  mediaWrapper: {
+    width: '100%',
+    backgroundColor: Colors.black,
+  },
+  media: {
+    width: '100%',
+    aspectRatio: 1,
+    backgroundColor: Colors.black,
   },
 });
 
